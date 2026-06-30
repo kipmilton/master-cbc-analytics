@@ -16,8 +16,11 @@ import { Route as CareersRouteImport } from './routes/careers'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TeacherIndexRouteImport } from './routes/teacher.index'
 import { Route as SchoolIndexRouteImport } from './routes/school.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as TeacherDirectoryRouteImport } from './routes/teacher.directory'
+import { Route as TeacherClassesRouteImport } from './routes/teacher.classes'
 import { Route as SchoolTeachersRouteImport } from './routes/school.teachers'
 import { Route as SchoolSubjectsRouteImport } from './routes/school.subjects'
 import { Route as SchoolAnalyticsRouteImport } from './routes/school.analytics'
@@ -58,6 +61,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeacherIndexRoute = TeacherIndexRouteImport.update({
+  id: '/teacher/',
+  path: '/teacher/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SchoolIndexRoute = SchoolIndexRouteImport.update({
   id: '/school/',
   path: '/school/',
@@ -66,6 +74,16 @@ const SchoolIndexRoute = SchoolIndexRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherDirectoryRoute = TeacherDirectoryRouteImport.update({
+  id: '/teacher/directory',
+  path: '/teacher/directory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherClassesRoute = TeacherClassesRouteImport.update({
+  id: '/teacher/classes',
+  path: '/teacher/classes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SchoolTeachersRoute = SchoolTeachersRouteImport.update({
@@ -101,8 +119,11 @@ export interface FileRoutesByFullPath {
   '/school/analytics': typeof SchoolAnalyticsRoute
   '/school/subjects': typeof SchoolSubjectsRoute
   '/school/teachers': typeof SchoolTeachersRoute
+  '/teacher/classes': typeof TeacherClassesRoute
+  '/teacher/directory': typeof TeacherDirectoryRoute
   '/admin/': typeof AdminIndexRoute
   '/school/': typeof SchoolIndexRoute
+  '/teacher/': typeof TeacherIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -116,8 +137,11 @@ export interface FileRoutesByTo {
   '/school/analytics': typeof SchoolAnalyticsRoute
   '/school/subjects': typeof SchoolSubjectsRoute
   '/school/teachers': typeof SchoolTeachersRoute
+  '/teacher/classes': typeof TeacherClassesRoute
+  '/teacher/directory': typeof TeacherDirectoryRoute
   '/admin': typeof AdminIndexRoute
   '/school': typeof SchoolIndexRoute
+  '/teacher': typeof TeacherIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -132,8 +156,11 @@ export interface FileRoutesById {
   '/school/analytics': typeof SchoolAnalyticsRoute
   '/school/subjects': typeof SchoolSubjectsRoute
   '/school/teachers': typeof SchoolTeachersRoute
+  '/teacher/classes': typeof TeacherClassesRoute
+  '/teacher/directory': typeof TeacherDirectoryRoute
   '/admin/': typeof AdminIndexRoute
   '/school/': typeof SchoolIndexRoute
+  '/teacher/': typeof TeacherIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -149,8 +176,11 @@ export interface FileRouteTypes {
     | '/school/analytics'
     | '/school/subjects'
     | '/school/teachers'
+    | '/teacher/classes'
+    | '/teacher/directory'
     | '/admin/'
     | '/school/'
+    | '/teacher/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -164,8 +194,11 @@ export interface FileRouteTypes {
     | '/school/analytics'
     | '/school/subjects'
     | '/school/teachers'
+    | '/teacher/classes'
+    | '/teacher/directory'
     | '/admin'
     | '/school'
+    | '/teacher'
   id:
     | '__root__'
     | '/'
@@ -179,8 +212,11 @@ export interface FileRouteTypes {
     | '/school/analytics'
     | '/school/subjects'
     | '/school/teachers'
+    | '/teacher/classes'
+    | '/teacher/directory'
     | '/admin/'
     | '/school/'
+    | '/teacher/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -195,8 +231,11 @@ export interface RootRouteChildren {
   SchoolAnalyticsRoute: typeof SchoolAnalyticsRoute
   SchoolSubjectsRoute: typeof SchoolSubjectsRoute
   SchoolTeachersRoute: typeof SchoolTeachersRoute
+  TeacherClassesRoute: typeof TeacherClassesRoute
+  TeacherDirectoryRoute: typeof TeacherDirectoryRoute
   AdminIndexRoute: typeof AdminIndexRoute
   SchoolIndexRoute: typeof SchoolIndexRoute
+  TeacherIndexRoute: typeof TeacherIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -250,6 +289,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/teacher/': {
+      id: '/teacher/'
+      path: '/teacher'
+      fullPath: '/teacher/'
+      preLoaderRoute: typeof TeacherIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/school/': {
       id: '/school/'
       path: '/school'
@@ -262,6 +308,20 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher/directory': {
+      id: '/teacher/directory'
+      path: '/teacher/directory'
+      fullPath: '/teacher/directory'
+      preLoaderRoute: typeof TeacherDirectoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher/classes': {
+      id: '/teacher/classes'
+      path: '/teacher/classes'
+      fullPath: '/teacher/classes'
+      preLoaderRoute: typeof TeacherClassesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/school/teachers': {
@@ -307,8 +367,11 @@ const rootRouteChildren: RootRouteChildren = {
   SchoolAnalyticsRoute: SchoolAnalyticsRoute,
   SchoolSubjectsRoute: SchoolSubjectsRoute,
   SchoolTeachersRoute: SchoolTeachersRoute,
+  TeacherClassesRoute: TeacherClassesRoute,
+  TeacherDirectoryRoute: TeacherDirectoryRoute,
   AdminIndexRoute: AdminIndexRoute,
   SchoolIndexRoute: SchoolIndexRoute,
+  TeacherIndexRoute: TeacherIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
