@@ -9,38 +9,292 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CareersRouteImport } from './routes/careers'
+import { Route as BlogRouteImport } from './routes/blog'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TeacherIndexRouteImport } from './routes/teacher.index'
+import { Route as SchoolIndexRouteImport } from './routes/school.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as TeacherExamsRouteImport } from './routes/teacher.exams'
+import { Route as TeacherDirectoryRouteImport } from './routes/teacher.directory'
+import { Route as TeacherClassesRouteImport } from './routes/teacher.classes'
+import { Route as SchoolTeachersRouteImport } from './routes/school.teachers'
+import { Route as SchoolSubjectsRouteImport } from './routes/school.subjects'
+import { Route as SchoolAnalyticsRouteImport } from './routes/school.analytics'
+import { Route as AdminSchoolsRouteImport } from './routes/admin.schools'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CareersRoute = CareersRouteImport.update({
+  id: '/careers',
+  path: '/careers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogRoute = BlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeacherIndexRoute = TeacherIndexRouteImport.update({
+  id: '/teacher/',
+  path: '/teacher/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SchoolIndexRoute = SchoolIndexRouteImport.update({
+  id: '/school/',
+  path: '/school/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherExamsRoute = TeacherExamsRouteImport.update({
+  id: '/teacher/exams',
+  path: '/teacher/exams',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherDirectoryRoute = TeacherDirectoryRouteImport.update({
+  id: '/teacher/directory',
+  path: '/teacher/directory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherClassesRoute = TeacherClassesRouteImport.update({
+  id: '/teacher/classes',
+  path: '/teacher/classes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SchoolTeachersRoute = SchoolTeachersRouteImport.update({
+  id: '/school/teachers',
+  path: '/school/teachers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SchoolSubjectsRoute = SchoolSubjectsRouteImport.update({
+  id: '/school/subjects',
+  path: '/school/subjects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SchoolAnalyticsRoute = SchoolAnalyticsRouteImport.update({
+  id: '/school/analytics',
+  path: '/school/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSchoolsRoute = AdminSchoolsRouteImport.update({
+  id: '/admin/schools',
+  path: '/admin/schools',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/blog': typeof BlogRoute
+  '/careers': typeof CareersRoute
+  '/contact': typeof ContactRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/admin/schools': typeof AdminSchoolsRoute
+  '/school/analytics': typeof SchoolAnalyticsRoute
+  '/school/subjects': typeof SchoolSubjectsRoute
+  '/school/teachers': typeof SchoolTeachersRoute
+  '/teacher/classes': typeof TeacherClassesRoute
+  '/teacher/directory': typeof TeacherDirectoryRoute
+  '/teacher/exams': typeof TeacherExamsRoute
+  '/admin/': typeof AdminIndexRoute
+  '/school/': typeof SchoolIndexRoute
+  '/teacher/': typeof TeacherIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/blog': typeof BlogRoute
+  '/careers': typeof CareersRoute
+  '/contact': typeof ContactRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/admin/schools': typeof AdminSchoolsRoute
+  '/school/analytics': typeof SchoolAnalyticsRoute
+  '/school/subjects': typeof SchoolSubjectsRoute
+  '/school/teachers': typeof SchoolTeachersRoute
+  '/teacher/classes': typeof TeacherClassesRoute
+  '/teacher/directory': typeof TeacherDirectoryRoute
+  '/teacher/exams': typeof TeacherExamsRoute
+  '/admin': typeof AdminIndexRoute
+  '/school': typeof SchoolIndexRoute
+  '/teacher': typeof TeacherIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/blog': typeof BlogRoute
+  '/careers': typeof CareersRoute
+  '/contact': typeof ContactRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/admin/schools': typeof AdminSchoolsRoute
+  '/school/analytics': typeof SchoolAnalyticsRoute
+  '/school/subjects': typeof SchoolSubjectsRoute
+  '/school/teachers': typeof SchoolTeachersRoute
+  '/teacher/classes': typeof TeacherClassesRoute
+  '/teacher/directory': typeof TeacherDirectoryRoute
+  '/teacher/exams': typeof TeacherExamsRoute
+  '/admin/': typeof AdminIndexRoute
+  '/school/': typeof SchoolIndexRoute
+  '/teacher/': typeof TeacherIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/blog'
+    | '/careers'
+    | '/contact'
+    | '/login'
+    | '/signup'
+    | '/admin/schools'
+    | '/school/analytics'
+    | '/school/subjects'
+    | '/school/teachers'
+    | '/teacher/classes'
+    | '/teacher/directory'
+    | '/teacher/exams'
+    | '/admin/'
+    | '/school/'
+    | '/teacher/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/about'
+    | '/blog'
+    | '/careers'
+    | '/contact'
+    | '/login'
+    | '/signup'
+    | '/admin/schools'
+    | '/school/analytics'
+    | '/school/subjects'
+    | '/school/teachers'
+    | '/teacher/classes'
+    | '/teacher/directory'
+    | '/teacher/exams'
+    | '/admin'
+    | '/school'
+    | '/teacher'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/blog'
+    | '/careers'
+    | '/contact'
+    | '/login'
+    | '/signup'
+    | '/admin/schools'
+    | '/school/analytics'
+    | '/school/subjects'
+    | '/school/teachers'
+    | '/teacher/classes'
+    | '/teacher/directory'
+    | '/teacher/exams'
+    | '/admin/'
+    | '/school/'
+    | '/teacher/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  BlogRoute: typeof BlogRoute
+  CareersRoute: typeof CareersRoute
+  ContactRoute: typeof ContactRoute
+  LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
+  AdminSchoolsRoute: typeof AdminSchoolsRoute
+  SchoolAnalyticsRoute: typeof SchoolAnalyticsRoute
+  SchoolSubjectsRoute: typeof SchoolSubjectsRoute
+  SchoolTeachersRoute: typeof SchoolTeachersRoute
+  TeacherClassesRoute: typeof TeacherClassesRoute
+  TeacherDirectoryRoute: typeof TeacherDirectoryRoute
+  TeacherExamsRoute: typeof TeacherExamsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  SchoolIndexRoute: typeof SchoolIndexRoute
+  TeacherIndexRoute: typeof TeacherIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/careers': {
+      id: '/careers'
+      path: '/careers'
+      fullPath: '/careers'
+      preLoaderRoute: typeof CareersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +302,98 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/teacher/': {
+      id: '/teacher/'
+      path: '/teacher'
+      fullPath: '/teacher/'
+      preLoaderRoute: typeof TeacherIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/school/': {
+      id: '/school/'
+      path: '/school'
+      fullPath: '/school/'
+      preLoaderRoute: typeof SchoolIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher/exams': {
+      id: '/teacher/exams'
+      path: '/teacher/exams'
+      fullPath: '/teacher/exams'
+      preLoaderRoute: typeof TeacherExamsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher/directory': {
+      id: '/teacher/directory'
+      path: '/teacher/directory'
+      fullPath: '/teacher/directory'
+      preLoaderRoute: typeof TeacherDirectoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher/classes': {
+      id: '/teacher/classes'
+      path: '/teacher/classes'
+      fullPath: '/teacher/classes'
+      preLoaderRoute: typeof TeacherClassesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/school/teachers': {
+      id: '/school/teachers'
+      path: '/school/teachers'
+      fullPath: '/school/teachers'
+      preLoaderRoute: typeof SchoolTeachersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/school/subjects': {
+      id: '/school/subjects'
+      path: '/school/subjects'
+      fullPath: '/school/subjects'
+      preLoaderRoute: typeof SchoolSubjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/school/analytics': {
+      id: '/school/analytics'
+      path: '/school/analytics'
+      fullPath: '/school/analytics'
+      preLoaderRoute: typeof SchoolAnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/schools': {
+      id: '/admin/schools'
+      path: '/admin/schools'
+      fullPath: '/admin/schools'
+      preLoaderRoute: typeof AdminSchoolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  BlogRoute: BlogRoute,
+  CareersRoute: CareersRoute,
+  ContactRoute: ContactRoute,
+  LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
+  AdminSchoolsRoute: AdminSchoolsRoute,
+  SchoolAnalyticsRoute: SchoolAnalyticsRoute,
+  SchoolSubjectsRoute: SchoolSubjectsRoute,
+  SchoolTeachersRoute: SchoolTeachersRoute,
+  TeacherClassesRoute: TeacherClassesRoute,
+  TeacherDirectoryRoute: TeacherDirectoryRoute,
+  TeacherExamsRoute: TeacherExamsRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  SchoolIndexRoute: SchoolIndexRoute,
+  TeacherIndexRoute: TeacherIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
