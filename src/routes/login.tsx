@@ -19,16 +19,19 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    setTimeout(() => {
-      const u = signIn(email, password);
-      setBusy(false);
-      if (!u) { toast.error("Invalid email or password"); return; }
-      toast.success(`Welcome back, ${u.name.split(" ")[0]}`);
-      navigate({ to: landingPathFor(u.role) });
-    }, 400);
+    const u = await signIn(email, password);
+    setBusy(false);
+
+    if (!u) {
+      toast.error("Invalid email or password, or your account metadata is incomplete.");
+      return;
+    }
+
+    toast.success(`Welcome back, ${u.name.split(" ")[0]}`);
+    navigate({ to: landingPathFor(u.role) });
   }
 
   function quickLogin(e: string, p: string) { setEmail(e); setPassword(p); }

@@ -85,7 +85,14 @@ export function AppShell({ children, allow }: { children: ReactNode; allow: Arra
           </div>
           <div className="flex items-center gap-3">
             <span className="hidden text-xs text-muted-foreground md:inline">{user.email}</span>
-            <Button variant="outline" size="sm" onClick={() => { signOut(); navigate({ to: "/login" }); }}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                await signOut();
+                navigate({ to: "/login" });
+              }}
+            >
               <LogOut className="mr-1 h-4 w-4" /> Sign out
             </Button>
           </div>
