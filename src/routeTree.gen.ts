@@ -24,6 +24,7 @@ import { Route as TeacherDirectoryRouteImport } from './routes/teacher.directory
 import { Route as TeacherClassesRouteImport } from './routes/teacher.classes'
 import { Route as SchoolTeachersRouteImport } from './routes/school.teachers'
 import { Route as SchoolSubjectsRouteImport } from './routes/school.subjects'
+import { Route as SchoolGradingRouteImport } from './routes/school.grading'
 import { Route as SchoolAnalyticsRouteImport } from './routes/school.analytics'
 import { Route as AdminSchoolsRouteImport } from './routes/admin.schools'
 
@@ -102,6 +103,11 @@ const SchoolSubjectsRoute = SchoolSubjectsRouteImport.update({
   path: '/school/subjects',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SchoolGradingRoute = SchoolGradingRouteImport.update({
+  id: '/school/grading',
+  path: '/school/grading',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SchoolAnalyticsRoute = SchoolAnalyticsRouteImport.update({
   id: '/school/analytics',
   path: '/school/analytics',
@@ -123,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/admin/schools': typeof AdminSchoolsRoute
   '/school/analytics': typeof SchoolAnalyticsRoute
+  '/school/grading': typeof SchoolGradingRoute
   '/school/subjects': typeof SchoolSubjectsRoute
   '/school/teachers': typeof SchoolTeachersRoute
   '/teacher/classes': typeof TeacherClassesRoute
@@ -142,6 +149,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/admin/schools': typeof AdminSchoolsRoute
   '/school/analytics': typeof SchoolAnalyticsRoute
+  '/school/grading': typeof SchoolGradingRoute
   '/school/subjects': typeof SchoolSubjectsRoute
   '/school/teachers': typeof SchoolTeachersRoute
   '/teacher/classes': typeof TeacherClassesRoute
@@ -162,6 +170,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/admin/schools': typeof AdminSchoolsRoute
   '/school/analytics': typeof SchoolAnalyticsRoute
+  '/school/grading': typeof SchoolGradingRoute
   '/school/subjects': typeof SchoolSubjectsRoute
   '/school/teachers': typeof SchoolTeachersRoute
   '/teacher/classes': typeof TeacherClassesRoute
@@ -183,6 +192,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin/schools'
     | '/school/analytics'
+    | '/school/grading'
     | '/school/subjects'
     | '/school/teachers'
     | '/teacher/classes'
@@ -202,6 +212,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin/schools'
     | '/school/analytics'
+    | '/school/grading'
     | '/school/subjects'
     | '/school/teachers'
     | '/teacher/classes'
@@ -221,6 +232,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin/schools'
     | '/school/analytics'
+    | '/school/grading'
     | '/school/subjects'
     | '/school/teachers'
     | '/teacher/classes'
@@ -241,6 +253,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   AdminSchoolsRoute: typeof AdminSchoolsRoute
   SchoolAnalyticsRoute: typeof SchoolAnalyticsRoute
+  SchoolGradingRoute: typeof SchoolGradingRoute
   SchoolSubjectsRoute: typeof SchoolSubjectsRoute
   SchoolTeachersRoute: typeof SchoolTeachersRoute
   TeacherClassesRoute: typeof TeacherClassesRoute
@@ -358,6 +371,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SchoolSubjectsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/school/grading': {
+      id: '/school/grading'
+      path: '/school/grading'
+      fullPath: '/school/grading'
+      preLoaderRoute: typeof SchoolGradingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/school/analytics': {
       id: '/school/analytics'
       path: '/school/analytics'
@@ -385,6 +405,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   AdminSchoolsRoute: AdminSchoolsRoute,
   SchoolAnalyticsRoute: SchoolAnalyticsRoute,
+  SchoolGradingRoute: SchoolGradingRoute,
   SchoolSubjectsRoute: SchoolSubjectsRoute,
   SchoolTeachersRoute: SchoolTeachersRoute,
   TeacherClassesRoute: TeacherClassesRoute,
