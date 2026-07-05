@@ -17,6 +17,7 @@ const navByRole = {
   school_admin: [
     { to: "/school", label: "Overview", icon: LayoutDashboard },
     { to: "/school/subjects", label: "Subjects", icon: BookOpen },
+    { to: "/school/grading", label: "Grading", icon: SlidersHorizontal },
     { to: "/school/teachers", label: "Teachers", icon: Users },
     { to: "/school/analytics", label: "Analytics", icon: BarChart3 },
   ] as NavItem[],
