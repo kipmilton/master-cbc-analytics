@@ -3,7 +3,7 @@ import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/lib/auth-store";
 import { useSession } from "@/hooks/use-session";
-import { LogOut, LayoutDashboard, Building2, Users, BookOpen, GraduationCap, BarChart3, FileSpreadsheet, ShieldCheck } from "lucide-react";
+import { LogOut, LayoutDashboard, Building2, Users, BookOpen, GraduationCap, BarChart3, FileSpreadsheet, ShieldCheck, SlidersHorizontal } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 
