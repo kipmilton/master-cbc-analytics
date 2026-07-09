@@ -1,38 +1,23 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { signOut } from "@/lib/auth-store";
 import { useSession } from "@/hooks/use-session";
-import { LogOut, LayoutDashboard, Building2, Users, BookOpen, GraduationCap, BarChart3, FileSpreadsheet, ShieldCheck, SlidersHorizontal } from "lucide-react";
+import { useStreams } from "@/lib/stream-store";
+import { useRosters } from "@/lib/roster-store";
+import { LogOut, LayoutDashboard, Building2, Users, BookOpen, GraduationCap, BarChart3, FileSpreadsheet, ShieldCheck, SlidersHorizontal, UsersRound, ClipboardCheck, UserSquare2 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 
-interface NavItem { to: string; label: string; icon: React.ComponentType<{ className?: string }>; }
-
-const navByRole = {
-  super_admin: [
-    { to: "/admin", label: "Overview", icon: LayoutDashboard },
-    { to: "/admin/schools", label: "Schools", icon: Building2 },
-  ] as NavItem[],
-  school_admin: [
-    { to: "/school", label: "Overview", icon: LayoutDashboard },
-    { to: "/school/subjects", label: "Subjects", icon: BookOpen },
-    { to: "/school/grading", label: "Grading", icon: SlidersHorizontal },
-    { to: "/school/teachers", label: "Teachers", icon: Users },
-    { to: "/school/analytics", label: "Analytics", icon: BarChart3 },
-  ] as NavItem[],
-  teacher: [
-    { to: "/teacher", label: "Overview", icon: LayoutDashboard },
-    { to: "/teacher/classes", label: "My Classes", icon: GraduationCap },
-    { to: "/teacher/exams", label: "Enter Exam", icon: FileSpreadsheet },
-    { to: "/teacher/directory", label: "Directory", icon: Users },
-  ] as NavItem[],
-};
+interface NavItem { to: string; label: string; icon: React.ComponentType<{ className?: string }>; badge?: number }
 
 export function AppShell({ children, allow }: { children: ReactNode; allow: Array<"super_admin" | "school_admin" | "teacher"> }) {
   const user = useSession();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [streams] = useStreams();
+  const [rosters] = useRosters();
 
   useEffect(() => {
     if (user === null) navigate({ to: "/login", replace: true });
@@ -43,7 +28,34 @@ export function AppShell({ children, allow }: { children: ReactNode; allow: Arra
     return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Loading…</div>;
   }
 
-  const items = navByRole[user.role];
+  const isClassTeacher = user.role === "teacher" && streams.some((s) => s.classTeacherId === user.id);
+  const pendingRosters = user.role === "school_admin" ? rosters.filter((r) => r.schoolId === user.schoolId && r.status === "pending").length : 0;
+
+  const items: NavItem[] = user.role === "super_admin"
+    ? [
+        { to: "/admin", label: "Overview", icon: LayoutDashboard },
+        { to: "/admin/schools", label: "Schools", icon: Building2 },
+      ]
+    : user.role === "school_admin"
+    ? [
+        { to: "/school", label: "Overview", icon: LayoutDashboard },
+        { to: "/school/students", label: "Students & Streams", icon: UsersRound },
+        { to: "/school/rosters", label: "Roster Approvals", icon: ClipboardCheck, badge: pendingRosters || undefined },
+        { to: "/school/subjects", label: "Subjects", icon: BookOpen },
+        { to: "/school/grading", label: "Grading", icon: SlidersHorizontal },
+        { to: "/school/teachers", label: "Teachers", icon: Users },
+        { to: "/school/analytics", label: "Analytics", icon: BarChart3 },
+      ]
+    : (() => {
+        const base: NavItem[] = [
+          { to: "/teacher", label: "Overview", icon: LayoutDashboard },
+          { to: "/teacher/classes", label: "My Classes", icon: GraduationCap },
+          { to: "/teacher/exams", label: "Enter Exam", icon: FileSpreadsheet },
+          { to: "/teacher/directory", label: "Directory", icon: Users },
+        ];
+        if (isClassTeacher) base.splice(2, 0, { to: "/teacher/my-class", label: "My Class", icon: UserSquare2 });
+        return base;
+      })();
 
   return (
     <div className="flex min-h-screen bg-secondary/30">
@@ -63,7 +75,8 @@ export function AppShell({ children, allow }: { children: ReactNode; allow: Arra
                 }`}
               >
                 <item.icon className="h-4 w-4" />
-                {item.label}
+                <span className="flex-1">{item.label}</span>
+                {item.badge ? <Badge className="h-5 min-w-5 justify-center bg-emerald-500 px-1.5 text-[10px] text-white hover:bg-emerald-500">{item.badge}</Badge> : null}
               </Link>
             );
           })}
