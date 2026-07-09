@@ -55,25 +55,50 @@ function getAppUser(user: User | null): AppUser | null {
   };
 }
 
+function getFriendlyAuthError(error: unknown): string | null {
+  if (!error) return null;
+
+  const message =
+    typeof error === "object" && error !== null && "message" in error
+      ? String((error as { message?: string }).message ?? "")
+      : String(error);
+
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes("invalid login credentials")) {
+    return "The email or password is incorrect. If you just signed up, check your email and confirm the account first.";
+  }
+
+  if (normalized.includes("email not confirmed") || normalized.includes("confirm your email")) {
+    return "Please confirm your email before signing in.";
+  }
+
+  if (normalized.includes("rate limit") || normalized.includes("too many requests")) {
+    return "Too many attempts. Please wait a moment and try again.";
+  }
+
+  return message || "We could not sign you in right now. Please try again.";
+}
+
 export function getSession(): AppUser | null {
   return getStoredSession();
 }
 
-export async function signIn(email: string, password: string): Promise<AppUser | null> {
+export async function signIn(email: string, password: string): Promise<{ user: AppUser | null; errorMessage: string | null }> {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error || !data.session?.user) {
-    console.error("Supabase sign in failed", error?.message ?? error);
-    return null;
+    console.error("Supabase sign in failed", error);
+    return { user: null, errorMessage: getFriendlyAuthError(error) };
   }
 
   const appUser = getAppUser(data.session.user);
   if (!appUser) {
-    return null;
+    return { user: null, errorMessage: "We could not load your account details. Please try again." };
   }
 
   saveStoredSession(appUser);
   window.dispatchEvent(new Event("mastercbc:auth"));
-  return appUser;
+  return { user: appUser, errorMessage: null };
 }
 
 export async function signOut() {

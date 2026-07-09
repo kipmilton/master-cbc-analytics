@@ -21,6 +21,8 @@ function SignupPage() {
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (busy) return;
+
     const form = e.currentTarget;
     const fd = new FormData(form);
     const email = String(fd.get("email") ?? "").trim().toLowerCase();
@@ -33,7 +35,7 @@ function SignupPage() {
     if (!system) return toast.error("Please pick a curriculum system");
 
     setBusy(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -48,7 +50,21 @@ function SignupPage() {
     });
     setBusy(false);
 
-    if (error) return toast.error(error.message);
+    if (error) {
+      const message = error.message || "We couldn't submit your application right now.";
+      if (error.status === 429 || /rate|too many/i.test(message)) {
+        return toast.error("Too many signup attempts. Please wait a minute and try again.");
+      }
+      if (/already|registered|exists/i.test(message)) {
+        return toast.error("This email is already registered. Please sign in instead.");
+      }
+      return toast.error(message);
+    }
+
+    if (!data.user) {
+      return toast.error("We couldn't create your account. Please try again.");
+    }
+
     toast.success("Application submitted. Check your email to verify, then sign in.");
     form.reset();
     setSystem("");
@@ -91,7 +107,7 @@ function SignupPage() {
           </CardContent>
         </Card>
       </div>
-      <div className="relative hidden flex-col justify-between bg-linear-to-br from-[color:var(--brand-blue)]/15 via-accent/20 to-primary/15 p-10 lg:flex">
+      <div className="relative hidden flex-col justify-between bg-linear-to-br from-(--brand-blue)/15 via-accent/20 to-primary/15 p-10 lg:flex">
         <Link to="/"><Logo className="h-8 w-auto" /></Link>
         <div>
           <h2 className="text-3xl font-bold">Your school, fully on-board in under a week.</h2>

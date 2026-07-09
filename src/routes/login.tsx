@@ -24,21 +24,24 @@ function LoginPage() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (busy) return;
+
     setBusy(true);
     setErrorMessage("");
 
-    const u = await signIn(email, password);
+    const result = await signIn(email, password);
 
     setBusy(false);
 
-    if (!u) {
-      setErrorMessage("Email or password is incorrect. Please try again.");
-      toast.error("Invalid email or password. Please try again.");
+    if (!result.user) {
+      const message = result.errorMessage || "Email or password is incorrect. Please try again.";
+      setErrorMessage(message);
+      toast.error(message);
       return;
     }
 
-    toast.success(`Welcome back, ${u.name.split(" ")[0]}`);
-    navigate({ to: landingPathFor(u.role) });
+    toast.success(`Welcome back, ${result.user.name.split(" ")[0]}`);
+    navigate({ to: landingPathFor(result.user.role) });
   }
 
   return (
