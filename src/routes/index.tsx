@@ -2,14 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicNav, PublicFooter } from "@/components/PublicChrome";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowRight, BarChart3, BookOpenCheck, ShieldCheck, Users, GraduationCap, LineChart, Building2, CheckCircle2 } from "lucide-react";
 import { testimonials } from "@/lib/mock-data";
-import { toast } from "sonner";
-import { useState } from "react";
+import { ContactInquiryForm } from "@/components/ContactInquiryForm";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -40,10 +35,10 @@ function LandingPage() {
 function Hero() {
   return (
     <section className="relative overflow-hidden">
-      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-accent/40 via-background to-secondary/40" />
+      <div className="absolute inset-0 -z-10 bg-linear-to-br from-accent/40 via-background to-secondary/40" />
       <div className="absolute -right-32 -top-32 -z-10 h-96 w-96 rounded-full bg-primary/15 blur-3xl" />
-      <div className="absolute -left-32 bottom-0 -z-10 h-96 w-96 rounded-full bg-[color:var(--brand-blue)]/10 blur-3xl" />
-      <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:py-28">
+      <div className="absolute -left-32 bottom-0 -z-10 h-96 w-96 rounded-full bg-(--brand-blue)/10 blur-3xl" />
+      <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:py-20">
         <div>
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
             <ShieldCheck className="h-3.5 w-3.5" />
@@ -55,7 +50,7 @@ function Hero() {
           <p className="mt-5 text-lg text-muted-foreground sm:text-xl">
             Transform exam marks into clear, actionable performance insight — for every learning area, every stream, every term. Built for CBC Junior &amp; Senior Secondary and the 8-4-4 Form 3-4 system.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-6 flex flex-wrap gap-3">
             <Button asChild size="lg" className="gap-2">
               <Link to="/signup">Get Started <ArrowRight className="h-4 w-4" /></Link>
             </Button>
@@ -63,7 +58,7 @@ function Hero() {
               <Link to="/login">Login to your school</Link>
             </Button>
           </div>
-          <div className="mt-8 grid grid-cols-3 gap-6 border-t border-border pt-6 text-sm">
+          <div className="mt-6 grid grid-cols-3 gap-6 border-t border-border pt-5 text-sm">
             <div><div className="text-2xl font-bold text-foreground">120+</div><div className="text-muted-foreground">Schools</div></div>
             <div><div className="text-2xl font-bold text-foreground">48k</div><div className="text-muted-foreground">Learners</div></div>
             <div><div className="text-2xl font-bold text-foreground">99.9%</div><div className="text-muted-foreground">Uptime</div></div>
@@ -71,7 +66,7 @@ function Hero() {
         </div>
         <div className="relative">
           <div className="rounded-2xl border border-border bg-card p-2 shadow-2xl shadow-primary/10">
-            <div className="rounded-xl bg-gradient-to-br from-secondary to-background p-6">
+            <div className="rounded-xl bg-linear-to-br from-secondary to-background p-6">
               <div className="mb-4 flex items-center justify-between">
                 <div>
                   <div className="text-xs text-muted-foreground">Grade 10 — Stream Performance</div>
@@ -198,15 +193,19 @@ function SocialProof() {
 }
 
 function ContactSection() {
-  const [submitting, setSubmitting] = useState(false);
   return (
     <section id="contact" className="bg-secondary/40 py-20">
-      <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-2">
+      <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-[0.95fr_1.05fr]">
         <div>
           <h2 className="text-3xl font-bold sm:text-4xl">Talk to us</h2>
           <p className="mt-3 text-muted-foreground">Tell us about your school and we&apos;ll get you onboarded in under a week.</p>
           <ul className="mt-8 space-y-3 text-sm">
-            {["Free onboarding & teacher training", "Migration assistance from spreadsheets", "Dedicated WhatsApp support line", "Compliant with the Kenya Data Protection Act"].map((p) => (
+            {[
+              "Free onboarding & teacher training",
+              "Migration assistance from spreadsheets",
+              "Dedicated WhatsApp support line",
+              "Compliant with the Kenya Data Protection Act",
+            ].map((p) => (
               <li key={p} className="flex items-center gap-3"><CheckCircle2 className="h-4 w-4 text-primary" />{p}</li>
             ))}
           </ul>
@@ -215,39 +214,7 @@ function ContactSection() {
             <div className="text-muted-foreground">Mon-Fri, 8am-6pm EAT</div>
           </div>
         </div>
-        <Card className="border-border/70">
-          <CardContent className="p-6">
-            <form
-              className="space-y-4"
-              onSubmit={(e) => {
-                e.preventDefault();
-                setSubmitting(true);
-                setTimeout(() => {
-                  setSubmitting(false);
-                  toast.success("Thank you! Our team will reach out shortly.");
-                  (e.target as HTMLFormElement).reset();
-                }, 700);
-              }}
-            >
-              <div className="grid gap-2"><Label htmlFor="name">Full Name</Label><Input id="name" required placeholder="Jane Wanjiru" /></div>
-              <div className="grid gap-2"><Label htmlFor="phone">Phone Number</Label><Input id="phone" required placeholder="+254 7XX XXX XXX" /></div>
-              <div className="grid gap-2"><Label htmlFor="school">School Name</Label><Input id="school" required placeholder="Mt. Kenya Academy" /></div>
-              <div className="grid gap-2">
-                <Label>Role</Label>
-                <Select required>
-                  <SelectTrigger><SelectValue placeholder="Select your role" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="principal">Principal</SelectItem>
-                    <SelectItem value="deputy">Deputy Principal</SelectItem>
-                    <SelectItem value="teacher">Teacher</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2"><Label htmlFor="message">Message</Label><Textarea id="message" rows={4} required placeholder="Tell us about your school..." /></div>
-              <Button type="submit" className="w-full" disabled={submitting}>{submitting ? "Sending…" : "Send Message"}</Button>
-            </form>
-          </CardContent>
-        </Card>
+        <ContactInquiryForm />
       </div>
     </section>
   );

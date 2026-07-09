@@ -56,7 +56,7 @@ function SignupPage() {
           </CardContent>
         </Card>
       </div>
-      <div className="relative hidden flex-col justify-between bg-gradient-to-br from-[color:var(--brand-blue)]/15 via-accent/20 to-primary/15 p-10 lg:flex">
+      <div className="relative hidden flex-col justify-between bg-linear-to-br from-[color:var(--brand-blue)]/15 via-accent/20 to-primary/15 p-10 lg:flex">
         <Link to="/"><Logo className="h-8 w-auto" /></Link>
         <div>
           <h2 className="text-3xl font-bold">Your school, fully on-board in under a week.</h2>
