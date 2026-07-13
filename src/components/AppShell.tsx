@@ -27,13 +27,19 @@ export function AppShell({ children, allow }: { children: ReactNode; allow: Arra
       return;
     }
 
-    if (!allow.includes(user.role)) {
-      navigate({ to: "/login", replace: true });
+    if (user.requiresPasswordReset && pathname !== "/reset-password") {
+      navigate({ to: "/reset-password", replace: true });
       return;
     }
 
-    if (user.role === "teacher" && user.accountStatus === "pending-approval" && pathname !== "/pending-approval" && pathname !== "/reset-password") {
+    if (user.accountStatus === "pending-approval" && pathname !== "/pending-approval" && pathname !== "/reset-password") {
       navigate({ to: "/pending-approval", replace: true });
+      return;
+    }
+
+    if (user.role === "unassigned" || !allow.includes(user.role as "super_admin" | "school_admin" | "teacher")) {
+      navigate({ to: "/login", replace: true });
+      return;
     }
   }, [user, allow, navigate, pathname]);
 
