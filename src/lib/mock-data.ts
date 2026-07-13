@@ -12,6 +12,9 @@ export interface MockUser {
   schoolId?: string;
   assignedStreams?: string[]; // stream ids
   title?: string; // Principal / Deputy / Teacher
+  accountStatus?: "active" | "pending-approval";
+  requiresPasswordReset?: boolean;
+  temporaryPassword?: string;
 }
 
 export interface School {
@@ -72,9 +75,10 @@ export const schools: School[] = [
 
 export const users: MockUser[] = [
   { id: "u0", email: "super@mastercbc.co.ke", password: "super123", name: "Sophie Wambui", role: "super_admin" },
-  { id: "u1", email: "principal@riverside.ac.ke", password: "school123", name: "James Otieno", role: "school_admin", schoolId: "s1", title: "Principal" },
-  { id: "u2", email: "deputy@riverside.ac.ke", password: "school123", name: "Grace Mwende", role: "school_admin", schoolId: "s1", title: "Deputy Principal" },
-  { id: "u3", email: "teacher@riverside.ac.ke", password: "teach123", name: "Peter Kamau", role: "teacher", schoolId: "s1", assignedStreams: ["st1", "st2"], title: "Chemistry Teacher" },
+  { id: "u1", email: "principal@riverside.ac.ke", password: "school123", name: "James Otieno", role: "school_admin", schoolId: "s1", title: "Principal", accountStatus: "active" },
+  { id: "u2", email: "deputy@riverside.ac.ke", password: "school123", name: "Grace Mwende", role: "school_admin", schoolId: "s1", title: "Deputy Principal (Academics)", accountStatus: "active" },
+  { id: "u5", email: "admin@riverside.ac.ke", password: "school123", name: "Njeri Wanjiku", role: "school_admin", schoolId: "s1", title: "Deputy Principal (Administration)", accountStatus: "active" },
+  { id: "u3", email: "teacher@riverside.ac.ke", password: "teach123", name: "Peter Kamau", role: "teacher", schoolId: "s1", assignedStreams: ["st1", "st2"], title: "Chemistry Teacher", accountStatus: "active" },
   { id: "u4", email: "mary@riverside.ac.ke", password: "teach123", name: "Mary Achieng", role: "teacher", schoolId: "s1", assignedStreams: ["st3"], title: "Biology Teacher" },
 ];
 

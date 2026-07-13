@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({ meta: [{ title: "Sign Up — Master CBC" }] }),
@@ -77,8 +78,12 @@ function SignupPage() {
         <Card className="w-full max-w-md border-border/70">
           <CardContent className="p-8">
             <div className="mb-6"><Logo className="h-7 w-auto" /></div>
+            <Link to="/" className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">
+              <ArrowLeft className="h-4 w-4" />
+              Back home
+            </Link>
             <h1 className="text-2xl font-bold">Register your school</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Submit your details — Super Admin will approve within 24 hrs.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Submit your details — we will approve within 24 hrs.</p>
             <form className="mt-6 space-y-4" onSubmit={onSubmit}>
               <div className="grid gap-2"><Label htmlFor="sname">School name</Label><Input id="sname" name="sname" required /></div>
               <div className="grid grid-cols-2 gap-3">

@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as PendingApprovalRouteImport } from './routes/pending-approval'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CareersRouteImport } from './routes/careers'
@@ -34,6 +36,16 @@ import { Route as AdminSchoolsRouteImport } from './routes/admin.schools'
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PendingApprovalRoute = PendingApprovalRouteImport.update({
+  id: '/pending-approval',
+  path: '/pending-approval',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -144,6 +156,8 @@ export interface FileRoutesByFullPath {
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
+  '/pending-approval': typeof PendingApprovalRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/admin/schools': typeof AdminSchoolsRoute
   '/school/analytics': typeof SchoolAnalyticsRoute
@@ -167,6 +181,8 @@ export interface FileRoutesByTo {
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
+  '/pending-approval': typeof PendingApprovalRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/admin/schools': typeof AdminSchoolsRoute
   '/school/analytics': typeof SchoolAnalyticsRoute
@@ -191,6 +207,8 @@ export interface FileRoutesById {
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
+  '/pending-approval': typeof PendingApprovalRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/admin/schools': typeof AdminSchoolsRoute
   '/school/analytics': typeof SchoolAnalyticsRoute
@@ -216,6 +234,8 @@ export interface FileRouteTypes {
     | '/careers'
     | '/contact'
     | '/login'
+    | '/pending-approval'
+    | '/reset-password'
     | '/signup'
     | '/admin/schools'
     | '/school/analytics'
@@ -239,6 +259,8 @@ export interface FileRouteTypes {
     | '/careers'
     | '/contact'
     | '/login'
+    | '/pending-approval'
+    | '/reset-password'
     | '/signup'
     | '/admin/schools'
     | '/school/analytics'
@@ -262,6 +284,8 @@ export interface FileRouteTypes {
     | '/careers'
     | '/contact'
     | '/login'
+    | '/pending-approval'
+    | '/reset-password'
     | '/signup'
     | '/admin/schools'
     | '/school/analytics'
@@ -286,6 +310,8 @@ export interface RootRouteChildren {
   CareersRoute: typeof CareersRoute
   ContactRoute: typeof ContactRoute
   LoginRoute: typeof LoginRoute
+  PendingApprovalRoute: typeof PendingApprovalRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   AdminSchoolsRoute: typeof AdminSchoolsRoute
   SchoolAnalyticsRoute: typeof SchoolAnalyticsRoute
@@ -310,6 +336,20 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pending-approval': {
+      id: '/pending-approval'
+      path: '/pending-approval'
+      fullPath: '/pending-approval'
+      preLoaderRoute: typeof PendingApprovalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -462,6 +502,8 @@ const rootRouteChildren: RootRouteChildren = {
   CareersRoute: CareersRoute,
   ContactRoute: ContactRoute,
   LoginRoute: LoginRoute,
+  PendingApprovalRoute: PendingApprovalRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   AdminSchoolsRoute: AdminSchoolsRoute,
   SchoolAnalyticsRoute: SchoolAnalyticsRoute,
@@ -481,3 +523,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

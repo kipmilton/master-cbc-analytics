@@ -132,7 +132,10 @@ function OrganizeRoster({ myClass, existingSubmission, onSubmit }: {
       <Card className="border-amber-300/60 bg-amber-50/40"><CardContent className="flex items-start gap-3 p-6">
         <Lock className="mt-0.5 h-5 w-5 text-amber-600" />
         <div>
-          <div className="font-semibold">Draft locked — awaiting admin approval</div>
+          <div className="flex items-center gap-2">
+            <div className="font-semibold">Pending Approval</div>
+            <Badge className="bg-amber-500/15 text-amber-700">Pending Approval</Badge>
+          </div>
           <div className="text-sm text-muted-foreground">You submitted {existingSubmission.studentIds.length} pool learner(s) and {existingSubmission.newStudents.length} new registration(s) on {existingSubmission.submittedAt}. The Principal or Deputy will review shortly.</div>
         </div>
       </CardContent></Card>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { users as seedUsers, streams as seedStreams } from "./mock-data";
 
-export type TeacherStatus = "Pending Invite" | "Active" | "Suspended";
+export type TeacherStatus = "Pending Invite" | "Pending Approval" | "Active" | "Suspended";
 
 export interface TeacherRow {
   id: string;
@@ -14,6 +14,8 @@ export interface TeacherRow {
   status: TeacherStatus;
   invitedAt?: string;
   activatedAt?: string;
+  temporaryPassword?: string;
+  approvalStatus?: "pending" | "active";
 }
 
 const KEY = "mastercbc.teachers";
@@ -32,6 +34,7 @@ function seed(): TeacherRow[] {
       assignedSubjects: [],
       status: "Active" as TeacherStatus,
       activatedAt: "2025-08-14",
+      approvalStatus: "active",
     }));
 }
 

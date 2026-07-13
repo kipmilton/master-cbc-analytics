@@ -74,7 +74,10 @@ function RostersPage() {
                 <div>
                   <div className="text-xs text-muted-foreground">Submitted by {r.teacherName} · {r.submittedAt}</div>
                   <div className="text-lg font-semibold">{stream?.grade} {stream?.name} <Badge variant="outline" className="ml-2">{stream?.system}</Badge></div>
-                  <div className="mt-1 text-xs text-muted-foreground">{pooled.length} from pool · {r.newStudents.length} new registration(s)</div>
+                  <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>{pooled.length} from pool · {r.newStudents.length} new registration(s)</span>
+                    <Badge className="bg-amber-500/15 text-amber-700">Pending Approval</Badge>
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={() => reject(r.id)}><XCircle className="mr-1 h-4 w-4" />Reject</Button>

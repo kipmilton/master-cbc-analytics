@@ -20,11 +20,24 @@ export function AppShell({ children, allow }: { children: ReactNode; allow: Arra
   const [rosters] = useRosters();
 
   useEffect(() => {
-    if (user === null) navigate({ to: "/login", replace: true });
-    else if (user && !allow.includes(user.role)) navigate({ to: "/login", replace: true });
-  }, [user, allow, navigate]);
+    if (user === undefined) return;
 
-  if (!user) {
+    if (user === null) {
+      navigate({ to: "/login", replace: true });
+      return;
+    }
+
+    if (!allow.includes(user.role)) {
+      navigate({ to: "/login", replace: true });
+      return;
+    }
+
+    if (user.role === "teacher" && user.accountStatus === "pending-approval" && pathname !== "/pending-approval" && pathname !== "/reset-password") {
+      navigate({ to: "/pending-approval", replace: true });
+    }
+  }, [user, allow, navigate, pathname]);
+
+  if (user === undefined || user === null) {
     return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Loading…</div>;
   }
 
@@ -83,7 +96,7 @@ export function AppShell({ children, allow }: { children: ReactNode; allow: Arra
         </nav>
         <div className="border-t border-border p-3">
           <div className="flex items-center gap-2 rounded-md bg-accent/40 px-3 py-2 text-xs text-accent-foreground">
-            <ShieldCheck className="h-4 w-4 text-[color:var(--brand-blue)]" />
+            <ShieldCheck className="h-4 w-4 text-brand-blue" />
             <span>Row-Level Secured</span>
           </div>
         </div>
