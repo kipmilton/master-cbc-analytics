@@ -2,7 +2,10 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireAuth } from "./auth-middleware";
 
+// PUBLIC — used at signup before a session exists.
 const applicationSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
   schoolName: z.string().min(2),
   county: z.string().min(2),
   phone: z.string().min(4),
@@ -12,21 +15,39 @@ const applicationSchema = z.object({
 });
 
 export const submitSchoolApplication = createServerFn({ method: "POST" })
-  .middleware([requireAuth])
   .inputValidator((raw) => applicationSchema.parse(raw))
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data }) => {
     const { getSupabaseAdmin } = await import("./supabase-admin.server");
     const admin = getSupabaseAdmin();
-    // Update profile name/title
+    const email = data.email.toLowerCase();
+
+    // Find or create the auth user (auto-confirm so they can sign in immediately).
+    let userId: string | null = null;
+    const { data: existingList } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
+    const existing = existingList.users.find((u) => (u.email ?? "").toLowerCase() === email);
+    if (existing) {
+      userId = existing.id;
+    } else {
+      const { data: created, error } = await admin.auth.admin.createUser({
+        email,
+        password: data.password,
+        email_confirm: true,
+        user_metadata: { name: data.principalName, title: data.principalTitle },
+      });
+      if (error || !created.user) throw new Error(error?.message ?? "Could not create account");
+      userId = created.user.id;
+    }
+
     await admin.from("profiles").upsert({
-      user_id: context.userId,
+      user_id: userId,
       full_name: data.principalName,
       title: data.principalTitle,
       must_reset_password: false,
     });
+
     const { error } = await admin.from("school_applications").upsert(
       {
-        user_id: context.userId,
+        user_id: userId,
         school_name: data.schoolName,
         county: data.county,
         phone: data.phone,
@@ -84,18 +105,14 @@ export const approveSchoolApplication = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const admin = await assertSuperAdmin(context.userId);
     const { data: app, error: appErr } = await admin
-      .from("school_applications")
-      .select("*")
-      .eq("id", data.applicationId)
-      .maybeSingle();
+      .from("school_applications").select("*").eq("id", data.applicationId).maybeSingle();
     if (appErr || !app) throw new Error(appErr?.message ?? "Application not found");
     if (app.status !== "pending") throw new Error("Application already reviewed");
 
     const { data: school, error: schErr } = await admin
       .from("schools")
       .insert({ name: app.school_name, county: app.county, phone: app.phone, system: app.system, status: "active" })
-      .select("id")
-      .single();
+      .select("id").single();
     if (schErr || !school) throw new Error(schErr?.message ?? "Could not create school");
 
     const { error: roleErr } = await admin
@@ -103,11 +120,9 @@ export const approveSchoolApplication = createServerFn({ method: "POST" })
       .insert({ user_id: app.user_id, role: "school_admin", school_id: school.id });
     if (roleErr && !/duplicate|unique/i.test(roleErr.message)) throw new Error(roleErr.message);
 
-    await admin
-      .from("school_applications")
+    await admin.from("school_applications")
       .update({ status: "approved", reviewed_by: context.userId, reviewed_at: new Date().toISOString() })
       .eq("id", data.applicationId);
-
     return { ok: true, schoolId: school.id };
   });
 
@@ -118,15 +133,11 @@ export const rejectSchoolApplication = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const admin = await assertSuperAdmin(context.userId);
-    const { error } = await admin
-      .from("school_applications")
+    const { error } = await admin.from("school_applications")
       .update({
-        status: "rejected",
-        reviewed_by: context.userId,
-        reviewed_at: new Date().toISOString(),
-        reject_reason: data.reason,
-      })
-      .eq("id", data.applicationId);
+        status: "rejected", reviewed_by: context.userId,
+        reviewed_at: new Date().toISOString(), reject_reason: data.reason,
+      }).eq("id", data.applicationId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

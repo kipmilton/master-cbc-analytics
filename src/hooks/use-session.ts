@@ -1,41 +1,27 @@
 import { useEffect, useState } from "react";
-import { getSession, refreshSessionFromSupabase } from "@/lib/auth-store";
+import { loadCurrentUser, type AppUser } from "@/lib/auth-store";
 import { supabase } from "@/lib/supabase";
-import type { AppUser } from "@/lib/auth-store";
 
 export function useSession() {
-  const [user, setUser] = useState<AppUser | null | undefined>(() => {
-    if (typeof window === "undefined") return undefined;
-    return getSession();
-  });
+  const [user, setUser] = useState<AppUser | null | undefined>(undefined);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const syncStoredSession = () => setUser(getSession());
-    syncStoredSession();
-
-    if (!getSession()) {
-      void refreshSessionFromSupabase().then((refreshed) => {
-        if (refreshed) setUser(refreshed);
-      });
+    let cancelled = false;
+    async function refresh() {
+      const next = await loadCurrentUser();
+      if (!cancelled) setUser(next);
     }
-
-    const { data: authSubscription } = supabase.auth.onAuthStateChange((_, session) => {
-      if (session?.user) {
-        setUser(getSession());
-      } else {
-        setUser(null);
-      }
+    refresh();
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") { setUser(null); return; }
+      refresh();
     });
-
-    window.addEventListener("mastercbc:auth", syncStoredSession);
-    window.addEventListener("storage", syncStoredSession);
-
+    const onEvt = () => refresh();
+    window.addEventListener("mastercbc:auth", onEvt);
     return () => {
-      window.removeEventListener("mastercbc:auth", syncStoredSession);
-      window.removeEventListener("storage", syncStoredSession);
-      authSubscription?.subscription.unsubscribe();
+      cancelled = true;
+      sub.subscription.unsubscribe();
+      window.removeEventListener("mastercbc:auth", onEvt);
     };
   }, []);
 
