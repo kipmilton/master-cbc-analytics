@@ -46,7 +46,7 @@ function LoginPage() {
       navigate({ to: "/reset-password" });
       return;
     }
-    if (result.user.accountStatus === "pending-approval" && result.user.role === "teacher") {
+    if (result.user.accountStatus === "pending-approval") {
       navigate({ to: "/pending-approval" });
       return;
     }

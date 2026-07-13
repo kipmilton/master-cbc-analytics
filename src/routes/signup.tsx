@@ -7,7 +7,7 @@ import { Logo } from "@/components/Logo";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { submitSchoolApplication } from "@/lib/tenants.functions";
 import { ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/signup")({
@@ -18,58 +18,36 @@ export const Route = createFileRoute("/signup")({
 function SignupPage() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
-  const [system, setSystem] = useState<string>("");
+  const [system, setSystem] = useState<"cbc" | "844" | "both" | "">("");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (busy) return;
-
-    const form = e.currentTarget;
-    const fd = new FormData(form);
-    const email = String(fd.get("email") ?? "").trim().toLowerCase();
-    const password = String(fd.get("pw") ?? "");
-    const name = String(fd.get("pname") ?? "").trim();
-    const schoolName = String(fd.get("sname") ?? "").trim();
-    const county = String(fd.get("county") ?? "").trim();
-    const phone = String(fd.get("phone") ?? "").trim();
-
-    if (!system) return toast.error("Please pick a curriculum system");
+    const fd = new FormData(e.currentTarget);
+    if (!system) return toast.error("Pick a curriculum system");
 
     setBusy(true);
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/login`,
+    try {
+      await submitSchoolApplication({
         data: {
-          role: "school_admin",
-          name,
-          title: "Principal",
-          pendingSchool: { name: schoolName, county, phone, system },
+          email: String(fd.get("email") ?? ""),
+          password: String(fd.get("pw") ?? ""),
+          schoolName: String(fd.get("sname") ?? ""),
+          county: String(fd.get("county") ?? ""),
+          phone: String(fd.get("phone") ?? ""),
+          system,
+          principalName: String(fd.get("pname") ?? ""),
+          principalTitle: "Principal",
         },
-      },
-    });
-    setBusy(false);
-
-    if (error) {
-      const message = error.message || "We couldn't submit your application right now.";
-      if (error.status === 429 || /rate|too many/i.test(message)) {
-        return toast.error("Too many signup attempts. Please wait a minute and try again.");
-      }
-      if (/already|registered|exists/i.test(message)) {
-        return toast.error("This email is already registered. Please sign in instead.");
-      }
-      return toast.error(message);
+      });
+      toast.success("Application submitted. Sign in to see your approval status.");
+      navigate({ to: "/login" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Could not submit your application.";
+      toast.error(message);
+    } finally {
+      setBusy(false);
     }
-
-    if (!data.user) {
-      return toast.error("We couldn't create your account. Please try again.");
-    }
-
-    toast.success("Application submitted. Check your email to verify, then sign in.");
-    form.reset();
-    setSystem("");
-    navigate({ to: "/login" });
   }
 
   return (
@@ -79,18 +57,17 @@ function SignupPage() {
           <CardContent className="p-8">
             <div className="mb-6"><Logo className="h-7 w-auto" /></div>
             <Link to="/" className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline">
-              <ArrowLeft className="h-4 w-4" />
-              Back home
+              <ArrowLeft className="h-4 w-4" /> Back home
             </Link>
             <h1 className="text-2xl font-bold">Register your school</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Submit your details — we will approve within 24 hrs.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Submit your details — we'll approve within 24 hrs.</p>
             <form className="mt-6 space-y-4" onSubmit={onSubmit}>
               <div className="grid gap-2"><Label htmlFor="sname">School name</Label><Input id="sname" name="sname" required /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="grid gap-2"><Label htmlFor="county">County</Label><Input id="county" name="county" required /></div>
                 <div className="grid gap-2">
                   <Label>System</Label>
-                  <Select value={system} onValueChange={setSystem} required>
+                  <Select value={system} onValueChange={(v) => setSystem(v as typeof system)} required>
                     <SelectTrigger><SelectValue placeholder="Select system" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="cbc">CBC (Grades 7-12)</SelectItem>

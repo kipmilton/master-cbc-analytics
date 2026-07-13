@@ -12,7 +12,7 @@ import { useTeachers, type TeacherRow } from "@/lib/teacher-store";
 import { useSubjects } from "@/lib/subject-store";
 import { streams } from "@/lib/mock-data";
 import { useSession } from "@/hooks/use-session";
-import { createManualTeacherAccount, createSchoolAdminAccount } from "@/lib/auth-store";
+import { createSchoolStaff } from "@/lib/staff.functions";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Send, CheckCircle2, Mail, Loader2, Eye, EyeOff, Copy, ShieldCheck, UserCog } from "lucide-react";
@@ -82,14 +82,23 @@ function TeachersPage() {
     setTeachers(next);
 
     if (mode === "manual") {
-      await createManualTeacherAccount({
-        name: newRow.name,
-        email: newRow.email,
-        schoolId,
-        password: tempPassword ?? DEFAULT_PASSWORD,
-        assignedStreams: [streamId],
-        title: "Teacher",
-      });
+      try {
+        await createSchoolStaff({
+          data: {
+            role: "teacher",
+            name: newRow.name,
+            email: newRow.email,
+            title: "Teacher",
+            tempPassword: tempPassword ?? DEFAULT_PASSWORD,
+            streamIds: [streamId],
+            subjectIds: subjectIds,
+          },
+        });
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Could not create teacher account");
+        setSending(false);
+        return;
+      }
     }
 
     toast.message(mode === "manual" ? "Creating teacher credentials…" : "Provisioning Supabase Auth user…", { icon: <Loader2 className="h-4 w-4 animate-spin" /> });
@@ -143,16 +152,25 @@ function TeachersPage() {
 
     setDeputyBusy(true);
     const title = deputyRole === "academics" ? "Deputy Principal (Academics)" : "Deputy Principal (Administration)";
-    createSchoolAdminAccount({
-      name: deputyName.trim(),
-      email: deputyEmail.trim().toLowerCase(),
-      schoolId,
-      password: deputyPassword.trim() || DEFAULT_PASSWORD,
-      title,
-    });
-    setDeputyBusy(false);
-    toast.success(`${title} account created for ${schoolId}.`);
-    setDeputyName(""); setDeputyEmail(""); setDeputyRole("academics"); setDeputyPassword(DEFAULT_PASSWORD);
+    try {
+      await createSchoolStaff({
+        data: {
+          role: "school_admin",
+          name: deputyName.trim(),
+          email: deputyEmail.trim().toLowerCase(),
+          title,
+          tempPassword: deputyPassword.trim() || DEFAULT_PASSWORD,
+          streamIds: [],
+          subjectIds: [],
+        },
+      });
+      toast.success(`${title} account created.`);
+      setDeputyName(""); setDeputyEmail(""); setDeputyRole("academics"); setDeputyPassword(DEFAULT_PASSWORD);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not create deputy account");
+    } finally {
+      setDeputyBusy(false);
+    }
   }
 
   return (
