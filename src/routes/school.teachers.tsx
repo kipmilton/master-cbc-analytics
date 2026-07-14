@@ -289,6 +289,28 @@ function TeachersPage() {
         </CardContent></Card>
 
         <Card className="border-border/70 xl:col-span-3"><CardContent className="p-0">
+          <div className="flex items-center justify-between border-b border-border px-5 py-3">
+            <div className="text-sm font-semibold">Live Supabase staff</div>
+            <div className="text-xs text-muted-foreground">{liveStaff.data?.length ?? 0} account(s)</div>
+          </div>
+          <div className="divide-y divide-border">
+            {liveStaff.isLoading && <div className="p-4 text-xs text-muted-foreground">Loading…</div>}
+            {liveStaff.data?.length === 0 && (
+              <div className="p-4 text-xs text-muted-foreground">No teacher accounts yet — create one below.</div>
+            )}
+            {liveStaff.data?.map((s) => (
+              <div key={s.userId} className="flex items-center justify-between px-5 py-3">
+                <div>
+                  <div className="text-sm font-medium">{s.name || s.email}</div>
+                  <div className="text-xs text-muted-foreground">{s.email} • {s.title || s.role}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-[10px] uppercase">{s.role}</Badge>
+                  {s.mustResetPassword && <Badge className="bg-amber-500/15 text-amber-700 text-[10px]">Must reset</Badge>}
+                </div>
+              </div>
+            ))}
+          </div>
           <div className="border-b border-border px-5 py-3 text-sm font-semibold">Staff directory</div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
