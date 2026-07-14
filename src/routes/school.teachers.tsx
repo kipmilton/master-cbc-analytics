@@ -155,7 +155,7 @@ function TeachersPage() {
     try {
       await createSchoolStaff({
         data: {
-          role: "school_admin",
+          role: "teacher",
           name: deputyName.trim(),
           email: deputyEmail.trim().toLowerCase(),
           title,
