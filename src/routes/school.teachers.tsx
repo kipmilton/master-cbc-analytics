@@ -125,6 +125,7 @@ function TeachersPage() {
     }
 
     setName(""); setEmail(""); setSubjectIds([]); setStreamId(""); setGrade(""); setPassword(DEFAULT_PASSWORD); setShowPassword(false);
+    qc.invalidateQueries({ queryKey: ["schoolStaff", schoolId] });
     setSending(false);
   }
 
