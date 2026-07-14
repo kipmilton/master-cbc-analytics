@@ -1,7 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireAuth } from "./auth-middleware";
 
-export type AppRole = "super_admin" | "school_admin" | "teacher";
+export type AppRole =
+  | "super_admin"
+  | "principal"
+  | "deputy_academic"
+  | "deputy_admin"
+  | "teacher"
+  | "student";
+
+export const SCHOOL_ADMIN_ROLES: AppRole[] = ["principal", "deputy_academic", "deputy_admin"];
 
 export interface MyProfile {
   userId: string;
@@ -25,25 +33,22 @@ export const getMyProfile = createServerFn({ method: "GET" })
     const admin = getSupabaseAdmin();
     const uid = context.userId;
 
-    const [{ data: profile }, { data: roles }, { data: app }] = await Promise.all([
-      admin.from("profiles").select("full_name,title,must_reset_password").eq("user_id", uid).maybeSingle(),
-      admin.from("user_roles").select("role,school_id").eq("user_id", uid),
+    const [{ data: profile }, { data: app }] = await Promise.all([
+      admin
+        .from("profiles")
+        .select("full_name,title,role,school_id,must_reset_password")
+        .eq("user_id", uid)
+        .maybeSingle(),
       admin.from("school_applications").select("status").eq("user_id", uid).maybeSingle(),
     ]);
 
-    const roleRow =
-      roles?.find((r) => r.role === "super_admin") ??
-      roles?.find((r) => r.role === "school_admin") ??
-      roles?.find((r) => r.role === "teacher") ??
-      null;
-
     let schoolName: string | null = null;
     let schoolStatus: MyProfile["schoolStatus"] = null;
-    if (roleRow?.school_id) {
+    if (profile?.school_id) {
       const { data: sch } = await admin
         .from("schools")
         .select("name,status")
-        .eq("id", roleRow.school_id)
+        .eq("id", profile.school_id)
         .maybeSingle();
       schoolName = sch?.name ?? null;
       schoolStatus = (sch?.status as MyProfile["schoolStatus"]) ?? null;
@@ -51,7 +56,7 @@ export const getMyProfile = createServerFn({ method: "GET" })
 
     let assignedStreamIds: string[] = [];
     let assignedSubjectIds: string[] = [];
-    if (roleRow?.role === "teacher" && roleRow.school_id) {
+    if (profile?.role === "teacher" && profile.school_id) {
       const { data: asg } = await admin
         .from("teacher_assignments")
         .select("stream_id,subject_id")
@@ -65,8 +70,8 @@ export const getMyProfile = createServerFn({ method: "GET" })
       email: context.email,
       name: profile?.full_name ?? context.email,
       title: profile?.title ?? null,
-      role: (roleRow?.role as AppRole | undefined) ?? null,
-      schoolId: roleRow?.school_id ?? null,
+      role: (profile?.role as AppRole | undefined) ?? null,
+      schoolId: profile?.school_id ?? null,
       schoolName,
       schoolStatus,
       mustResetPassword: profile?.must_reset_password ?? false,

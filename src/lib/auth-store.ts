@@ -1,7 +1,8 @@
 import { supabase } from "./supabase";
-import { getMyProfile, clearMustResetPassword, type MyProfile, type AppRole } from "./me.functions";
+import { getMyProfile, clearMustResetPassword, type MyProfile, type AppRole, SCHOOL_ADMIN_ROLES } from "./me.functions";
 
 export type { AppRole };
+export { SCHOOL_ADMIN_ROLES };
 
 export interface AppUser {
   id: string;
@@ -19,11 +20,16 @@ export interface AppUser {
   applicationStatus?: "pending" | "approved" | "rejected";
 }
 
+export function isSchoolAdminRole(role: AppUser["role"]): boolean {
+  return role === "principal" || role === "deputy_academic" || role === "deputy_admin";
+}
+
 export function profileToAppUser(p: MyProfile): AppUser {
+  const isSchoolAdmin = p.role ? SCHOOL_ADMIN_ROLES.includes(p.role) : false;
   const pending =
-    p.applicationStatus === "pending" ||
     (p.role === null && p.applicationStatus !== "approved") ||
-    (p.role === "school_admin" && p.schoolStatus !== "active");
+    p.applicationStatus === "pending" ||
+    (isSchoolAdmin && p.schoolStatus !== "active");
   return {
     id: p.userId,
     email: p.email,
@@ -45,8 +51,7 @@ export async function loadCurrentUser(): Promise<AppUser | null> {
   const { data } = await supabase.auth.getSession();
   if (!data.session) return null;
   try {
-    const profile = await getMyProfile();
-    return profileToAppUser(profile);
+    return profileToAppUser(await getMyProfile());
   } catch (err) {
     console.error("Failed to load profile", err);
     return null;
@@ -72,10 +77,8 @@ export async function signIn(email: string, password: string): Promise<{ user: A
 }
 
 export async function signOut() {
-  try { await supabase.auth.signOut(); } catch {}
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event("mastercbc:auth"));
-  }
+  try { await supabase.auth.signOut(); } catch { /* soft-fail */ }
+  if (typeof window !== "undefined") window.dispatchEvent(new Event("mastercbc:auth"));
 }
 
 export async function updateMyPassword(newPassword: string): Promise<{ ok: boolean; error?: string }> {
@@ -87,7 +90,7 @@ export async function updateMyPassword(newPassword: string): Promise<{ ok: boole
 
 export function landingPathFor(role: AppUser["role"]) {
   if (role === "super_admin") return "/admin";
-  if (role === "school_admin") return "/school";
+  if (role === "principal" || role === "deputy_academic" || role === "deputy_admin") return "/school";
   if (role === "teacher") return "/teacher";
   return "/pending-approval";
 }

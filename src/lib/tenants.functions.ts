@@ -2,7 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireAuth } from "./auth-middleware";
 
-// PUBLIC — used at signup before a session exists.
 const applicationSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
@@ -21,7 +20,6 @@ export const submitSchoolApplication = createServerFn({ method: "POST" })
     const admin = getSupabaseAdmin();
     const email = data.email.toLowerCase();
 
-    // Find or create the auth user (auto-confirm so they can sign in immediately).
     let userId: string | null = null;
     const { data: existingList } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
     const existing = existingList.users.find((u) => (u.email ?? "").toLowerCase() === email);
@@ -40,6 +38,7 @@ export const submitSchoolApplication = createServerFn({ method: "POST" })
 
     await admin.from("profiles").upsert({
       user_id: userId,
+      email,
       full_name: data.principalName,
       title: data.principalTitle,
       must_reset_password: false,
@@ -65,13 +64,8 @@ export const submitSchoolApplication = createServerFn({ method: "POST" })
 async function assertSuperAdmin(userId: string) {
   const { getSupabaseAdmin } = await import("./supabase-admin.server");
   const admin = getSupabaseAdmin();
-  const { data } = await admin
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .eq("role", "super_admin")
-    .maybeSingle();
-  if (!data) throw new Response("Forbidden", { status: 403 });
+  const { data } = await admin.from("profiles").select("role").eq("user_id", userId).maybeSingle();
+  if (data?.role !== "super_admin") throw new Response("Forbidden", { status: 403 });
   return admin;
 }
 
@@ -115,10 +109,12 @@ export const approveSchoolApplication = createServerFn({ method: "POST" })
       .select("id").single();
     if (schErr || !school) throw new Error(schErr?.message ?? "Could not create school");
 
-    const { error: roleErr } = await admin
-      .from("user_roles")
-      .insert({ user_id: app.user_id, role: "school_admin", school_id: school.id });
-    if (roleErr && !/duplicate|unique/i.test(roleErr.message)) throw new Error(roleErr.message);
+    // Promote the applicant to principal of this school (profiles is the single source of truth)
+    const { error: profErr } = await admin
+      .from("profiles")
+      .update({ role: "principal", school_id: school.id, title: app.principal_title ?? "Principal" })
+      .eq("user_id", app.user_id);
+    if (profErr) throw new Error(profErr.message);
 
     await admin.from("school_applications")
       .update({ status: "approved", reviewed_by: context.userId, reviewed_at: new Date().toISOString() })
