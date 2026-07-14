@@ -12,7 +12,8 @@ import { useTeachers, type TeacherRow } from "@/lib/teacher-store";
 import { useSubjects } from "@/lib/subject-store";
 import { streams } from "@/lib/mock-data";
 import { useSession } from "@/hooks/use-session";
-import { createSchoolStaff } from "@/lib/staff.functions";
+import { createSchoolStaff, listSchoolStaff } from "@/lib/staff.functions";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Send, CheckCircle2, Mail, Loader2, Eye, EyeOff, Copy, ShieldCheck, UserCog } from "lucide-react";
@@ -35,6 +36,12 @@ function TeachersPage() {
   const schoolStreams = streams.filter((s) => s.schoolId === schoolId);
   const schoolSubjects = subjects.filter((s) => s.schoolId === schoolId && s.approved);
   const rows = teachers.filter((t) => t.schoolId === schoolId);
+  const qc = useQueryClient();
+  const liveStaff = useQuery({
+    queryKey: ["schoolStaff", schoolId],
+    queryFn: () => listSchoolStaff(),
+    enabled: !!user?.schoolId,
+  });
 
   const [mode, setMode] = useState<OnboardingMode>("invite");
   const [name, setName] = useState("");
@@ -118,6 +125,7 @@ function TeachersPage() {
     }
 
     setName(""); setEmail(""); setSubjectIds([]); setStreamId(""); setGrade(""); setPassword(DEFAULT_PASSWORD); setShowPassword(false);
+    qc.invalidateQueries({ queryKey: ["schoolStaff", schoolId] });
     setSending(false);
   }
 
@@ -155,7 +163,7 @@ function TeachersPage() {
     try {
       await createSchoolStaff({
         data: {
-          role: "school_admin",
+          role: deputyRole === "academics" ? "deputy_academic" : "deputy_admin",
           name: deputyName.trim(),
           email: deputyEmail.trim().toLowerCase(),
           title,
@@ -166,6 +174,7 @@ function TeachersPage() {
       });
       toast.success(`${title} account created.`);
       setDeputyName(""); setDeputyEmail(""); setDeputyRole("academics"); setDeputyPassword(DEFAULT_PASSWORD);
+      qc.invalidateQueries({ queryKey: ["schoolStaff", schoolId] });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not create deputy account");
     } finally {
@@ -280,6 +289,28 @@ function TeachersPage() {
         </CardContent></Card>
 
         <Card className="border-border/70 xl:col-span-3"><CardContent className="p-0">
+          <div className="flex items-center justify-between border-b border-border px-5 py-3">
+            <div className="text-sm font-semibold">Live Supabase staff</div>
+            <div className="text-xs text-muted-foreground">{liveStaff.data?.length ?? 0} account(s)</div>
+          </div>
+          <div className="divide-y divide-border">
+            {liveStaff.isLoading && <div className="p-4 text-xs text-muted-foreground">Loading…</div>}
+            {liveStaff.data?.length === 0 && (
+              <div className="p-4 text-xs text-muted-foreground">No teacher accounts yet — create one below.</div>
+            )}
+            {liveStaff.data?.map((s) => (
+              <div key={s.userId} className="flex items-center justify-between px-5 py-3">
+                <div>
+                  <div className="text-sm font-medium">{s.name || s.email}</div>
+                  <div className="text-xs text-muted-foreground">{s.email} • {s.title || s.role}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-[10px] uppercase">{s.role}</Badge>
+                  {s.mustResetPassword && <Badge className="bg-amber-500/15 text-amber-700 text-[10px]">Must reset</Badge>}
+                </div>
+              </div>
+            ))}
+          </div>
           <div className="border-b border-border px-5 py-3 text-sm font-semibold">Staff directory</div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

@@ -20,7 +20,8 @@ function PendingApprovalPage() {
   if (user === null) { navigate({ to: "/login", replace: true }); return null; }
   if (user.accountStatus === "active") { navigate({ to: landingPathFor(user.role), replace: true }); return null; }
 
-  const isPrincipalApp = user.applicationStatus === "pending" || (user.role === "school_admin" && user.schoolStatus !== "active");
+  const schoolAdminRoles = ["principal", "deputy_academic", "deputy_admin"] as const;
+  const isPrincipalApp = user.applicationStatus === "pending" || ((schoolAdminRoles as readonly string[]).includes(user.role) && user.schoolStatus !== "active");
   const isRejected = user.applicationStatus === "rejected";
 
   return (
