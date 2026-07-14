@@ -36,6 +36,12 @@ function TeachersPage() {
   const schoolStreams = streams.filter((s) => s.schoolId === schoolId);
   const schoolSubjects = subjects.filter((s) => s.schoolId === schoolId && s.approved);
   const rows = teachers.filter((t) => t.schoolId === schoolId);
+  const qc = useQueryClient();
+  const liveStaff = useQuery({
+    queryKey: ["schoolStaff", schoolId],
+    queryFn: () => listSchoolStaff(),
+    enabled: !!user?.schoolId,
+  });
 
   const [mode, setMode] = useState<OnboardingMode>("invite");
   const [name, setName] = useState("");
