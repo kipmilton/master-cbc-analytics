@@ -173,6 +173,7 @@ function TeachersPage() {
       });
       toast.success(`${title} account created.`);
       setDeputyName(""); setDeputyEmail(""); setDeputyRole("academics"); setDeputyPassword(DEFAULT_PASSWORD);
+      qc.invalidateQueries({ queryKey: ["schoolStaff", schoolId] });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not create deputy account");
     } finally {
