@@ -12,7 +12,15 @@ import { useEffect } from "react";
 
 interface NavItem { to: string; label: string; icon: React.ComponentType<{ className?: string }>; badge?: number }
 
-export function AppShell({ children, allow }: { children: ReactNode; allow: Array<"super_admin" | "school_admin" | "teacher"> }) {
+type AllowRole = "super_admin" | "school_admin" | "teacher";
+
+const SCHOOL_ADMIN_ROLES = ["principal", "deputy_academic", "deputy_admin"] as const;
+function matchesAllow(role: string, allow: AllowRole[]): boolean {
+  if (allow.includes("school_admin") && (SCHOOL_ADMIN_ROLES as readonly string[]).includes(role)) return true;
+  return (allow as string[]).includes(role);
+}
+
+export function AppShell({ children, allow }: { children: ReactNode; allow: AllowRole[] }) {
   const user = useSession();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -37,7 +45,7 @@ export function AppShell({ children, allow }: { children: ReactNode; allow: Arra
       return;
     }
 
-    if (user.role === "unassigned" || !allow.includes(user.role as "super_admin" | "school_admin" | "teacher")) {
+    if (user.role === "unassigned" || !matchesAllow(user.role, allow)) {
       navigate({ to: "/login", replace: true });
       return;
     }
@@ -47,15 +55,16 @@ export function AppShell({ children, allow }: { children: ReactNode; allow: Arra
     return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Loading…</div>;
   }
 
+  const isSchoolAdmin = (SCHOOL_ADMIN_ROLES as readonly string[]).includes(user.role);
   const isClassTeacher = user.role === "teacher" && streams.some((s) => s.classTeacherId === user.id);
-  const pendingRosters = user.role === "school_admin" ? rosters.filter((r) => r.schoolId === user.schoolId && r.status === "pending").length : 0;
+  const pendingRosters = isSchoolAdmin ? rosters.filter((r) => r.schoolId === user.schoolId && r.status === "pending").length : 0;
 
   const items: NavItem[] = user.role === "super_admin"
     ? [
         { to: "/admin", label: "Overview", icon: LayoutDashboard },
         { to: "/admin/schools", label: "Schools", icon: Building2 },
       ]
-    : user.role === "school_admin"
+    : isSchoolAdmin
     ? [
         { to: "/school", label: "Overview", icon: LayoutDashboard },
         { to: "/school/students", label: "Students & Streams", icon: UsersRound },
