@@ -76,7 +76,7 @@ function AnalyticsPage() {
           <Card key={s.id} className="border-border/70"><CardContent className="p-5">
             <div className="text-xs text-muted-foreground">{s.grade}</div>
             <div className="text-lg font-semibold">Stream {s.name}</div>
-            <div className="mt-3 text-2xl font-bold text-primary">{streamCompositeMean(s.id)}</div>
+            <div className="mt-3 text-2xl font-bold text-primary">{compositeMeanOf(exams, s.id)}</div>
             <div className="text-xs text-muted-foreground">Composite mean points</div>
           </CardContent></Card>
         ))}
@@ -133,7 +133,7 @@ function AnalyticsPage() {
             </thead>
             <tbody className="divide-y divide-border">
               {parallelStreams.map((s) => {
-                const dist = gradeDistribution(s.id);
+                const dist: Record<string, number> = distributionOf(exams, s.id);
                 const total = Object.values(dist).reduce((a, b) => a + b, 0) || 1;
                 return (
                   <tr key={s.id}>
