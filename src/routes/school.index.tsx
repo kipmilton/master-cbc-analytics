@@ -4,9 +4,12 @@ import { StatCard, PageHeader } from "@/components/DashboardBits";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/hooks/use-session";
-import { students, streams, subjects, exams, examMean, streamCompositeMean } from "@/lib/mock-data";
+import { useStudents } from "@/lib/student-store";
+import { useStreams } from "@/lib/stream-store";
+import { useSubjects } from "@/lib/subject-store";
+import { useExams, examMean, compositeMeanOf } from "@/lib/exam-store";
 import { GraduationCap, BookOpen, Users, TrendingUp } from "lucide-react";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 export const Route = createFileRoute("/school/")({
   head: () => ({ meta: [{ title: "School Dashboard — Master CBC" }] }),
@@ -16,27 +19,41 @@ export const Route = createFileRoute("/school/")({
 function SchoolHome() {
   const user = useSession();
   const schoolId = user?.schoolId ?? "s1";
-  const schoolStudents = students.filter((s) => s.schoolId === schoolId);
-  const schoolStreams = streams.filter((s) => s.schoolId === schoolId);
-  const schoolSubjects = subjects.filter((s) => s.schoolId === schoolId);
-  const recent = exams.filter((e) => e.schoolId === schoolId).slice(-6);
+  const [allStudents] = useStudents();
+  const [allStreams] = useStreams();
+  const [allSubjects] = useSubjects();
+  const [allExams] = useExams();
+
+  const schoolStudents = allStudents.filter((s) => s.schoolId === schoolId && s.status === "active");
+  const schoolStreams = allStreams.filter((s) => s.schoolId === schoolId);
+  const subjects = allSubjects.filter((s) => s.schoolId === schoolId);
+  const schoolExams = allExams.filter((e) => e.schoolId === schoolId);
+  const streams = schoolStreams;
+  const recent = schoolExams.slice(-6);
+
+  const lockedExams = schoolExams.filter((e) => e.locked);
+  const overallMean = lockedExams.length
+    ? Math.round((lockedExams.reduce((a, e) => a + examMean(e).points, 0) / lockedExams.length) * 100) / 100
+    : 0;
 
   const streamData = schoolStreams.map((s) => ({
     name: `${s.grade} ${s.name}`,
-    mean: streamCompositeMean(s.id),
+    mean: compositeMeanOf(schoolExams, s.id),
   }));
+
 
   return (
     <AppShell allow={["school_admin"]}>
       <PageHeader
         title="Welcome to Master CBC"
-        subtitle={`Signed in as ${user?.title} — viewing Riverside Senior School`}
+        subtitle={`Signed in as ${user?.title ?? "school admin"}${user?.schoolName ? ` — ${user.schoolName}` : ""}`}
       />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Total Students" value={schoolStudents.length} icon={<GraduationCap className="h-5 w-5" />} />
         <StatCard label="Streams" value={schoolStreams.length} hint="Across all grades" icon={<Users className="h-5 w-5" />} accent="blue" />
-        <StatCard label="Approved Subjects" value={schoolSubjects.filter((s) => s.approved).length} hint={`${schoolSubjects.filter((s) => !s.approved).length} pending review`} icon={<BookOpen className="h-5 w-5" />} accent="emerald" />
-        <StatCard label="Composite Mean Trend" value="+2.1%" hint="Over last term" icon={<TrendingUp className="h-5 w-5" />} />
+        <StatCard label="Approved Subjects" value={subjects.filter((s) => s.approved).length} hint={`${subjects.filter((s) => !s.approved).length} pending review`} icon={<BookOpen className="h-5 w-5" />} accent="emerald" />
+        <StatCard label="School Composite Mean" value={overallMean || "—"} hint={`${lockedExams.length} locked exam record(s)`} icon={<TrendingUp className="h-5 w-5" />} />
+
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
@@ -59,8 +76,17 @@ function SchoolHome() {
         </CardContent></Card>
 
         <Card className="border-border/70"><CardContent className="p-5">
-          <div className="text-sm font-semibold">Recent submissions</div>
+          <div className="flex items-center justify-between">
+            <div className="text-sm font-semibold">Recent submissions</div>
+            <Button asChild size="sm" variant="ghost"><Link to="/school/exams">Manage</Link></Button>
+          </div>
           <div className="mt-3 space-y-2 text-sm">
+            {recent.length === 0 && (
+              <div className="rounded-md border border-dashed border-border px-3 py-6 text-center text-xs text-muted-foreground">
+                No exam records yet. Create one under Exams &amp; Results.
+              </div>
+            )}
+
             {recent.map((e) => {
               const sub = subjects.find((s) => s.id === e.subjectId);
               const st = streams.find((s) => s.id === e.streamId);

@@ -4,7 +4,9 @@ import { StatCard, PageHeader } from "@/components/DashboardBits";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/hooks/use-session";
-import { streams, students, exams, examMean } from "@/lib/mock-data";
+import { useStreams } from "@/lib/stream-store";
+import { useStudents } from "@/lib/student-store";
+import { useExams, examMean, EXAM_TERMS } from "@/lib/exam-store";
 import { GraduationCap, Users, TrendingUp, ArrowRight } from "lucide-react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
@@ -16,8 +18,12 @@ export const Route = createFileRoute("/teacher/")({
 function TeacherHome() {
   const user = useSession();
   const myStreamIds = user?.assignedStreams ?? [];
+  const [streams] = useStreams();
+  const [allStudents] = useStudents();
+  const [exams] = useExams();
+  const students = allStudents.filter((s) => s.status === "active");
   const myStreams = streams.filter((s) => myStreamIds.includes(s.id));
-  const myStudents = students.filter((s) => myStreamIds.includes(s.streamId));
+  const myStudents = students.filter((s) => s.streamId && myStreamIds.includes(s.streamId));
 
   const trend = ["Term 1 - Opener", "Term 1 - Mid", "Term 1 - End", "Term 2 - Opener", "Term 2 - End"].map((term) => {
     const ex = exams.filter((e) => myStreamIds.includes(e.streamId) && e.term === term && e.teacherId === user?.id);
