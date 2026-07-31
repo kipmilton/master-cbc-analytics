@@ -4,9 +4,12 @@ import { StatCard, PageHeader } from "@/components/DashboardBits";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/hooks/use-session";
-import { students, streams, subjects, exams, examMean, streamCompositeMean } from "@/lib/mock-data";
+import { useStudents } from "@/lib/student-store";
+import { useStreams } from "@/lib/stream-store";
+import { useSubjects } from "@/lib/subject-store";
+import { useExams, examMean, compositeMeanOf } from "@/lib/exam-store";
 import { GraduationCap, BookOpen, Users, TrendingUp } from "lucide-react";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 export const Route = createFileRoute("/school/")({
   head: () => ({ meta: [{ title: "School Dashboard — Master CBC" }] }),
@@ -16,15 +19,28 @@ export const Route = createFileRoute("/school/")({
 function SchoolHome() {
   const user = useSession();
   const schoolId = user?.schoolId ?? "s1";
-  const schoolStudents = students.filter((s) => s.schoolId === schoolId);
-  const schoolStreams = streams.filter((s) => s.schoolId === schoolId);
-  const schoolSubjects = subjects.filter((s) => s.schoolId === schoolId);
-  const recent = exams.filter((e) => e.schoolId === schoolId).slice(-6);
+  const [allStudents] = useStudents();
+  const [allStreams] = useStreams();
+  const [allSubjects] = useSubjects();
+  const [allExams] = useExams();
+
+  const schoolStudents = allStudents.filter((s) => s.schoolId === schoolId && s.status === "active");
+  const schoolStreams = allStreams.filter((s) => s.schoolId === schoolId);
+  const subjects = allSubjects.filter((s) => s.schoolId === schoolId);
+  const schoolExams = allExams.filter((e) => e.schoolId === schoolId);
+  const streams = schoolStreams;
+  const recent = schoolExams.slice(-6);
+
+  const lockedExams = schoolExams.filter((e) => e.locked);
+  const overallMean = lockedExams.length
+    ? Math.round((lockedExams.reduce((a, e) => a + examMean(e).points, 0) / lockedExams.length) * 100) / 100
+    : 0;
 
   const streamData = schoolStreams.map((s) => ({
     name: `${s.grade} ${s.name}`,
-    mean: streamCompositeMean(s.id),
+    mean: compositeMeanOf(schoolExams, s.id),
   }));
+
 
   return (
     <AppShell allow={["school_admin"]}>
