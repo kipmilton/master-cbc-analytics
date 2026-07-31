@@ -13,8 +13,16 @@ async function assertSchoolAdmin(userId: string) {
   if (!data?.school_id || !["principal", "deputy_academic", "deputy_admin"].includes(data.role ?? "")) {
     throw new Response("Forbidden", { status: 403 });
   }
+  // The school itself must still be active — suspended tenants cannot mutate data.
+  const { data: school } = await admin
+    .from("schools")
+    .select("status")
+    .eq("id", data.school_id)
+    .maybeSingle();
+  if (school?.status !== "active") throw new Response("Forbidden", { status: 403 });
   return { admin, schoolId: data.school_id as string };
 }
+
 
 const staffSchema = z.object({
   role: z.enum(["teacher", "deputy_academic", "deputy_admin"]),
@@ -22,8 +30,8 @@ const staffSchema = z.object({
   email: z.string().email(),
   title: z.string().default("Teacher"),
   tempPassword: z.string().min(8),
-  streamIds: z.array(z.string().uuid()).default([]),
-  subjectIds: z.array(z.string().uuid()).default([]),
+  streamIds: z.array(z.string()).default([]),
+  subjectIds: z.array(z.string()).default([]),
 });
 
 export const createSchoolStaff = createServerFn({ method: "POST" })
@@ -33,13 +41,25 @@ export const createSchoolStaff = createServerFn({ method: "POST" })
     const { admin, schoolId } = await assertSchoolAdmin(context.userId);
     const email = data.email.toLowerCase();
 
-    // Reuse existing auth user if present, else create with must_reset_password flag
+    // SECURITY: a school admin may only (re)issue credentials for accounts that
+    // belong to their own tenant. Without this check a principal could reset the
+    // password of the super admin or of another school's staff and take it over.
     let userId: string | null = null;
     const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
     const existing = list.users.find((u) => (u.email ?? "").toLowerCase() === email);
     if (existing) {
+      const { data: prof } = await admin
+        .from("profiles")
+        .select("role, school_id")
+        .eq("user_id", existing.id)
+        .maybeSingle();
+      const belongsHere = !prof?.school_id || prof.school_id === schoolId;
+      const isPrivileged = prof?.role === "super_admin" || prof?.role === "principal";
+      if (!belongsHere || isPrivileged) {
+        throw new Response("This email already belongs to another account.", { status: 403 });
+      }
       userId = existing.id;
-      // Reset password to the temporary one and force reset on next login
+      // Re-issue the temporary password for this school's own staff member
       await admin.auth.admin.updateUserById(userId, { password: data.tempPassword, email_confirm: true });
     } else {
       const { data: created, error } = await admin.auth.admin.createUser({
@@ -65,16 +85,30 @@ export const createSchoolStaff = createServerFn({ method: "POST" })
     if (profErr) throw new Error(profErr.message);
 
     if (data.role === "teacher" && (data.streamIds.length || data.subjectIds.length)) {
+      // Only accept streams/subjects that actually belong to this school
+      const [{ data: okStreams }, { data: okSubjects }] = await Promise.all([
+        data.streamIds.length
+          ? admin.from("streams").select("id").eq("school_id", schoolId).in("id", data.streamIds)
+          : Promise.resolve({ data: [] as { id: string }[] }),
+        data.subjectIds.length
+          ? admin.from("subjects").select("id").eq("school_id", schoolId).in("id", data.subjectIds)
+          : Promise.resolve({ data: [] as { id: string }[] }),
+      ]);
+      const streamIds = (okStreams ?? []).map((r) => r.id);
+      const subjectIds = (okSubjects ?? []).map((r) => r.id);
+
       const rows: Array<Record<string, string>> = [];
-      const streams = data.streamIds.length ? data.streamIds : [""];
-      const subjects = data.subjectIds.length ? data.subjectIds : [""];
+      const streams = streamIds.length ? streamIds : [""];
+      const subjects = subjectIds.length ? subjectIds : [""];
       for (const s of streams) for (const sub of subjects) {
+        if (!s && !sub) continue;
         const row: Record<string, string> = { teacher_id: userId, school_id: schoolId };
         if (s) row.stream_id = s;
         if (sub) row.subject_id = sub;
         rows.push(row);
       }
       if (rows.length) await admin.from("teacher_assignments").insert(rows);
+
     }
 
     return { ok: true, userId };
