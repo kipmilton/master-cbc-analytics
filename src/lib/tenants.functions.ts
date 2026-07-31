@@ -20,29 +20,36 @@ export const submitSchoolApplication = createServerFn({ method: "POST" })
     const admin = getSupabaseAdmin();
     const email = data.email.toLowerCase();
 
-    let userId: string | null = null;
-    const { data: existingList } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
+    // SECURITY: this endpoint is public. It may never touch an account that
+    // already exists — otherwise anyone could overwrite another user's profile
+    // (or squat an existing admin's identity) by "applying" with their email.
+    const { data: existingList } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
     const existing = existingList.users.find((u) => (u.email ?? "").toLowerCase() === email);
     if (existing) {
-      userId = existing.id;
-    } else {
-      const { data: created, error } = await admin.auth.admin.createUser({
-        email,
-        password: data.password,
-        email_confirm: true,
-        user_metadata: { name: data.principalName, title: data.principalTitle },
-      });
-      if (error || !created.user) throw new Error(error?.message ?? "Could not create account");
-      userId = created.user.id;
+      throw new Error(
+        "An account with this email already exists. Please sign in to view your application status.",
+      );
     }
+
+    const { data: created, error: createErr } = await admin.auth.admin.createUser({
+      email,
+      password: data.password,
+      email_confirm: true,
+      user_metadata: { name: data.principalName, title: data.principalTitle },
+    });
+    if (createErr || !created.user) throw new Error(createErr?.message ?? "Could not create account");
+    const userId = created.user.id;
 
     await admin.from("profiles").upsert({
       user_id: userId,
       email,
       full_name: data.principalName,
       title: data.principalTitle,
+      role: null,
+      school_id: null,
       must_reset_password: false,
     });
+
 
     const { error } = await admin.from("school_applications").upsert(
       {
