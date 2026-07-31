@@ -76,8 +76,17 @@ function SchoolHome() {
         </CardContent></Card>
 
         <Card className="border-border/70"><CardContent className="p-5">
-          <div className="text-sm font-semibold">Recent submissions</div>
+          <div className="flex items-center justify-between">
+            <div className="text-sm font-semibold">Recent submissions</div>
+            <Button asChild size="sm" variant="ghost"><Link to="/school/exams">Manage</Link></Button>
+          </div>
           <div className="mt-3 space-y-2 text-sm">
+            {recent.length === 0 && (
+              <div className="rounded-md border border-dashed border-border px-3 py-6 text-center text-xs text-muted-foreground">
+                No exam records yet. Create one under Exams &amp; Results.
+              </div>
+            )}
+
             {recent.map((e) => {
               const sub = subjects.find((s) => s.id === e.subjectId);
               const st = streams.find((s) => s.id === e.streamId);
