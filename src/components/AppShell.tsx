@@ -70,6 +70,7 @@ export function AppShell({ children, allow }: { children: ReactNode; allow: Allo
         { to: "/school/students", label: "Students & Streams", icon: UsersRound },
         { to: "/school/rosters", label: "Roster Approvals", icon: ClipboardCheck, badge: pendingRosters || undefined },
         { to: "/school/subjects", label: "Subjects", icon: BookOpen },
+        { to: "/school/exams", label: "Exams & Results", icon: FileSpreadsheet },
         { to: "/school/grading", label: "Grading", icon: SlidersHorizontal },
         { to: "/school/teachers", label: "Teachers", icon: Users },
         { to: "/school/analytics", label: "Analytics", icon: BarChart3 },

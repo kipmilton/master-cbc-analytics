@@ -8,7 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useSession } from "@/hooks/use-session";
-import { streams, students, schools } from "@/lib/mock-data";
+import { schools } from "@/lib/mock-data";
+import { useStreams } from "@/lib/stream-store";
+import { useStudents } from "@/lib/student-store";
+import { appendExam, type CBCRubric, type ExamEntry } from "@/lib/exam-store";
 import { useSubjects } from "@/lib/subject-store";
 import { useGradingConfig, computeEight, computeCBC } from "@/lib/grading-store";
 import { useMemo, useState } from "react";
@@ -27,6 +30,8 @@ function ExamEntryPage() {
   const user = useSession();
   const [subjects] = useSubjects();
   const [cfg] = useGradingConfig();
+  const [streams] = useStreams();
+  const [allStudents] = useStudents();
 
   const [workspace, setWorkspace] = useState<Workspace>("CBC");
   const [cbcFilter, setCbcFilter] = useState<CBCLevelFilter>("All");
@@ -46,7 +51,10 @@ function ExamEntryPage() {
   const [examType, setExamType] = useState("End Term Exam");
   const [locked, setLocked] = useState(false);
 
-  const streamStudents = useMemo(() => students.filter((x) => x.streamId === streamId), [streamId]);
+  const streamStudents = useMemo(
+    () => allStudents.filter((x) => x.streamId === streamId && x.status === "active"),
+    [allStudents, streamId],
+  );
   // For CBC we still accept 0-100 raw and compute band from admin bands (fallback chain: school-wide default here).
   const [scores, setScores] = useState<Record<string, number | undefined>>({});
 
@@ -58,6 +66,28 @@ function ExamEntryPage() {
   function submit() {
     if (!subjectId || !streamId) return toast.error("Pick a stream and subject");
     if (filled.length === 0) return toast.error("Enter at least one score");
+
+    // Persist to the shared exam records so admin dashboards show the same figures.
+    const entry: ExamEntry = {
+      id: `ex-${Date.now()}`,
+      schoolId: user?.schoolId ?? "s1",
+      streamId,
+      subjectId,
+      teacherId: user?.id ?? "teacher",
+      term,
+      examName: examType || term,
+      system: workspace,
+      locked: true,
+      createdAt: new Date().toISOString().slice(0, 10),
+      scores: filled.map((stu) => {
+        const raw = scores[stu.id] ?? 0;
+        if (workspace === "8-4-4") return { studentId: stu.id, score: raw };
+        const code = computeCBC(raw, cbcBands).code;
+        const rubric = (["EE", "ME", "AE", "BE"] as CBCRubric[]).find((r) => code.startsWith(r)) ?? "ME";
+        return { studentId: stu.id, rubric };
+      }),
+    };
+    appendExam(entry);
     setLocked(true);
     toast.success("Exam locked & submitted. Results pushed to admin.");
   }
