@@ -30,8 +30,8 @@ const staffSchema = z.object({
   email: z.string().email(),
   title: z.string().default("Teacher"),
   tempPassword: z.string().min(8),
-  streamIds: z.array(z.string().uuid()).default([]),
-  subjectIds: z.array(z.string().uuid()).default([]),
+  streamIds: z.array(z.string()).default([]),
+  subjectIds: z.array(z.string()).default([]),
 });
 
 export const createSchoolStaff = createServerFn({ method: "POST" })
