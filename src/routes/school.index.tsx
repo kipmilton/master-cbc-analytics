@@ -46,13 +46,14 @@ function SchoolHome() {
     <AppShell allow={["school_admin"]}>
       <PageHeader
         title="Welcome to Master CBC"
-        subtitle={`Signed in as ${user?.title} — viewing Riverside Senior School`}
+        subtitle={`Signed in as ${user?.title ?? "school admin"}${user?.schoolName ? ` — ${user.schoolName}` : ""}`}
       />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Total Students" value={schoolStudents.length} icon={<GraduationCap className="h-5 w-5" />} />
         <StatCard label="Streams" value={schoolStreams.length} hint="Across all grades" icon={<Users className="h-5 w-5" />} accent="blue" />
-        <StatCard label="Approved Subjects" value={schoolSubjects.filter((s) => s.approved).length} hint={`${schoolSubjects.filter((s) => !s.approved).length} pending review`} icon={<BookOpen className="h-5 w-5" />} accent="emerald" />
-        <StatCard label="Composite Mean Trend" value="+2.1%" hint="Over last term" icon={<TrendingUp className="h-5 w-5" />} />
+        <StatCard label="Approved Subjects" value={subjects.filter((s) => s.approved).length} hint={`${subjects.filter((s) => !s.approved).length} pending review`} icon={<BookOpen className="h-5 w-5" />} accent="emerald" />
+        <StatCard label="School Composite Mean" value={overallMean || "—"} hint={`${lockedExams.length} locked exam record(s)`} icon={<TrendingUp className="h-5 w-5" />} />
+
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
