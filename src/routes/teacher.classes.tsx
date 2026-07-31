@@ -4,7 +4,9 @@ import { PageHeader } from "@/components/DashboardBits";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useSession } from "@/hooks/use-session";
-import { streams, students, exams, examMean, streamCompositeMean } from "@/lib/mock-data";
+import { useStreams } from "@/lib/stream-store";
+import { useStudents } from "@/lib/student-store";
+import { useExams, examMean, compositeMeanOf } from "@/lib/exam-store";
 
 export const Route = createFileRoute("/teacher/classes")({
   head: () => ({ meta: [{ title: "My Classes — Master CBC" }] }),
@@ -14,6 +16,10 @@ export const Route = createFileRoute("/teacher/classes")({
 function MyClasses() {
   const user = useSession();
   const myStreamIds = user?.assignedStreams ?? [];
+  const [streams] = useStreams();
+  const [allStudents] = useStudents();
+  const [exams] = useExams();
+  const students = allStudents.filter((s) => s.status === "active");
   const myStreams = streams.filter((s) => myStreamIds.includes(s.id));
 
   return (
@@ -35,7 +41,7 @@ function MyClasses() {
               <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded-md bg-secondary/50 p-3">
                   <div className="text-xs text-muted-foreground">Composite mean</div>
-                  <div className="text-xl font-bold text-primary">{streamCompositeMean(s.id)}</div>
+                  <div className="text-xl font-bold text-primary">{compositeMeanOf(exams, s.id)}</div>
                 </div>
                 <div className="rounded-md bg-secondary/50 p-3">
                   <div className="text-xs text-muted-foreground">My submissions</div>
