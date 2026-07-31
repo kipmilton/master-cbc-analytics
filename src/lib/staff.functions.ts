@@ -13,8 +13,16 @@ async function assertSchoolAdmin(userId: string) {
   if (!data?.school_id || !["principal", "deputy_academic", "deputy_admin"].includes(data.role ?? "")) {
     throw new Response("Forbidden", { status: 403 });
   }
+  // The school itself must still be active — suspended tenants cannot mutate data.
+  const { data: school } = await admin
+    .from("schools")
+    .select("status")
+    .eq("id", data.school_id)
+    .maybeSingle();
+  if (school?.status !== "active") throw new Response("Forbidden", { status: 403 });
   return { admin, schoolId: data.school_id as string };
 }
+
 
 const staffSchema = z.object({
   role: z.enum(["teacher", "deputy_academic", "deputy_admin"]),
