@@ -1,15 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireAuth } from "./auth-middleware";
+import { SCHOOL_ADMIN_ROLES, type AppRole } from "./roles";
 
-export type AppRole =
-  | "super_admin"
-  | "principal"
-  | "deputy_academic"
-  | "deputy_admin"
-  | "teacher"
-  | "student";
-
-export const SCHOOL_ADMIN_ROLES: AppRole[] = ["principal", "deputy_academic", "deputy_admin"];
+export type { AppRole };
+export { SCHOOL_ADMIN_ROLES };
 
 export interface MyProfile {
   userId: string;
@@ -24,6 +18,7 @@ export interface MyProfile {
   applicationStatus: "pending" | "approved" | "rejected" | null;
   assignedStreamIds: string[];
   assignedSubjectIds: string[];
+  classTeacherStreamIds: string[];
 }
 
 export const getMyProfile = createServerFn({ method: "GET" })
@@ -56,13 +51,21 @@ export const getMyProfile = createServerFn({ method: "GET" })
 
     let assignedStreamIds: string[] = [];
     let assignedSubjectIds: string[] = [];
+    let classTeacherStreamIds: string[] = [];
     if (profile?.role === "teacher" && profile.school_id) {
-      const { data: asg } = await admin
-        .from("teacher_assignments")
-        .select("stream_id,subject_id")
-        .eq("teacher_id", uid);
-      assignedStreamIds = Array.from(new Set((asg ?? []).map((a) => a.stream_id).filter(Boolean))) as string[];
-      assignedSubjectIds = Array.from(new Set((asg ?? []).map((a) => a.subject_id).filter(Boolean))) as string[];
+      const [{ data: asg }, { data: owned }] = await Promise.all([
+        admin.from("teacher_assignments").select("stream_id,subject_id").eq("teacher_id", uid),
+        admin.from("streams").select("id").eq("class_teacher_id", uid).eq("school_id", profile.school_id),
+      ]);
+      assignedStreamIds = Array.from(
+        new Set((asg ?? []).map((a) => a.stream_id).filter(Boolean)),
+      ) as string[];
+      assignedSubjectIds = Array.from(
+        new Set((asg ?? []).map((a) => a.subject_id).filter(Boolean)),
+      ) as string[];
+      classTeacherStreamIds = (owned ?? []).map((s) => s.id as string);
+      // A class teacher always sees their own stream in the picker.
+      assignedStreamIds = Array.from(new Set([...assignedStreamIds, ...classTeacherStreamIds]));
     }
 
     return {
@@ -78,6 +81,7 @@ export const getMyProfile = createServerFn({ method: "GET" })
       applicationStatus: (app?.status as MyProfile["applicationStatus"]) ?? null,
       assignedStreamIds,
       assignedSubjectIds,
+      classTeacherStreamIds,
     };
   });
 
