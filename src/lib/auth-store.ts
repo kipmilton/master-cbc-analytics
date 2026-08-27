@@ -23,7 +23,6 @@ export interface AppUser {
 }
 
 export function profileToAppUser(p: MyProfile): AppUser {
-  const schoolAdmin = isSchoolAdminRole(p.role);
   // Nobody gets a workspace until they hold a role inside an active school.
   const pending =
     p.role === null ||
@@ -42,7 +41,7 @@ export function profileToAppUser(p: MyProfile): AppUser {
     assignedStreams: p.assignedStreamIds,
     assignedSubjects: p.assignedSubjectIds,
     classTeacherStreams: p.classTeacherStreamIds,
-    accountStatus: pending && !schoolAdmin ? "pending-approval" : pending ? "pending-approval" : "active",
+    accountStatus: pending ? "pending-approval" : "active",
     requiresPasswordReset: p.mustResetPassword,
     applicationStatus: p.applicationStatus ?? undefined,
   };
