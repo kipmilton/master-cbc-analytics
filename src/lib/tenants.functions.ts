@@ -100,6 +100,31 @@ export const listAllSchools = createServerFn({ method: "GET" })
     return data ?? [];
   });
 
+/** Aggregate counters for the super-admin overview. No tenant rows leave the server. */
+export const getPlatformStats = createServerFn({ method: "GET" })
+  .middleware([requireAuth])
+  .handler(async ({ context }) => {
+    const admin = await assertSuperAdmin(context.userId);
+    const [schools, apps, students, exams, staff] = await Promise.all([
+      admin.from("schools").select("id,status"),
+      admin.from("school_applications").select("id,status"),
+      admin.from("students").select("id", { count: "exact", head: true }).eq("status", "active"),
+      admin.from("exams").select("id", { count: "exact", head: true }).eq("locked", true),
+      admin.from("profiles").select("id", { count: "exact", head: true }).not("school_id", "is", null),
+    ]);
+
+    const schoolRows = schools.data ?? [];
+    return {
+      totalSchools: schoolRows.length,
+      activeSchools: schoolRows.filter((s) => s.status === "active").length,
+      suspendedSchools: schoolRows.filter((s) => s.status === "suspended").length,
+      pendingApplications: (apps.data ?? []).filter((a) => a.status === "pending").length,
+      activeLearners: students.count ?? 0,
+      lockedExams: exams.count ?? 0,
+      staffAccounts: staff.count ?? 0,
+    };
+  });
+
 export const approveSchoolApplication = createServerFn({ method: "POST" })
   .middleware([requireAuth])
   .inputValidator((raw) => z.object({ applicationId: z.string().uuid() }).parse(raw))
