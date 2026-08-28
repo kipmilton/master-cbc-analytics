@@ -9,20 +9,32 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  useGradingConfig, DEFAULT_CBC4, DEFAULT_CBC8, validateBands,
+  DEFAULT_CBC4, DEFAULT_CBC8, validateBands,
   type EightBand, type CBCBand, type MeanRule, type CBCRollup,
-} from "@/lib/grading-store";
-import { RotateCcw, Save, ShieldCheck } from "lucide-react";
+} from "@/lib/grading";
+import { useSchoolData } from "@/hooks/use-school-data";
+import { saveGradingConfig } from "@/lib/school-data.functions";
+import { useMutation } from "@tanstack/react-query";
+import { RotateCcw, Save, ShieldCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/school/grading")({
-  head: () => ({ meta: [{ title: "Grading Configuration — Master CBC" }] }),
+  head: () => ({
+    meta: [
+      { title: "Grading Configuration — Master CBC" },
+      { name: "description", content: "Customise 8-4-4 mark bands, CBC performance levels and class mean rules for your school." },
+      { property: "og:title", content: "Grading Configuration — Master CBC" },
+      { property: "og:description", content: "Customise mark bands, CBC levels and mean rules for your school." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: GradingPage,
 });
 
 function GradingPage() {
-  const [cfg, setCfg] = useGradingConfig();
+  const { grading: cfg, refresh } = useSchoolData();
   const [eight, setEight] = useState<EightBand[]>(cfg.eight);
   const [cbc4, setCbc4] = useState<CBCBand[]>(cfg.cbc4);
   const [cbc8, setCbc8] = useState<CBCBand[]>(cfg.cbc8);
@@ -31,18 +43,43 @@ function GradingPage() {
   const [bestN, setBestN] = useState(cfg.bestN);
   const [rollup, setRollup] = useState<CBCRollup>(cfg.cbcRollup);
   const [internal, setInternal] = useState(cfg.cbcInternalAnalytics);
+  const [dirty, setDirty] = useState(false);
+
+  // Hydrate the editor once the school's stored configuration arrives.
+  useEffect(() => {
+    if (dirty) return;
+    setEight(cfg.eight); setCbc4(cfg.cbc4); setCbc8(cfg.cbc8); setSplit(cfg.splitCBC);
+    setMeanRule(cfg.meanRule); setBestN(cfg.bestN); setRollup(cfg.cbcRollup); setInternal(cfg.cbcInternalAnalytics);
+  }, [cfg, dirty]);
 
   const eightErr = validateBands(eight);
   const cbcErr = validateBands(split ? cbc8 : cbc4);
 
+  const mutation = useMutation({
+    mutationFn: (config: Record<string, unknown>) => saveGradingConfig({ data: { config } }),
+    onSuccess: () => {
+      setDirty(false);
+      refresh();
+      toast.success("Grading configuration saved. Teachers see the new rules instantly.");
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save configuration"),
+  });
+
   function save() {
     if (eightErr) return toast.error(`8-4-4 bands: ${eightErr}`);
     if (cbcErr) return toast.error(`CBC bands: ${cbcErr}`);
-    setCfg({ ...cfg, eight, cbc4, cbc8, splitCBC: split, meanRule, bestN, cbcRollup: rollup, cbcInternalAnalytics: internal });
-    toast.success("Grading configuration saved. Teachers will see the new rules instantly.");
+    mutation.mutate({
+      ...cfg,
+      eight, cbc4, cbc8,
+      splitCBC: split,
+      meanRule, bestN,
+      cbcRollup: rollup,
+      cbcInternalAnalytics: internal,
+    } as unknown as Record<string, unknown>);
   }
 
   function resetAll() {
+    setDirty(false);
     setEight(cfg.eight); setCbc4(cfg.cbc4); setCbc8(cfg.cbc8); setSplit(cfg.splitCBC);
     setMeanRule(cfg.meanRule); setBestN(cfg.bestN); setRollup(cfg.cbcRollup); setInternal(cfg.cbcInternalAnalytics);
   }
