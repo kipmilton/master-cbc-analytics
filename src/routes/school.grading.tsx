@@ -63,8 +63,8 @@ function GradingPage() {
   // Hydrate the editor once the school's stored configuration arrives.
   useEffect(() => {
     if (dirty) return;
-    setEight(cfg.eight); setCbc4(cfg.cbc4); setCbc8(cfg.cbc8); setSplit(cfg.splitCBC);
-    setMeanRule(cfg.meanRule); setBestN(cfg.bestN); setRollup(cfg.cbcRollup); setInternal(cfg.cbcInternalAnalytics);
+    rawSetEight(cfg.eight); rawSetCbc4(cfg.cbc4); rawSetCbc8(cfg.cbc8); rawSetSplit(cfg.splitCBC);
+    rawSetMeanRule(cfg.meanRule); rawSetBestN(cfg.bestN); rawSetRollup(cfg.cbcRollup); rawSetInternal(cfg.cbcInternalAnalytics);
   }, [cfg, dirty]);
 
   const eightErr = validateBands(eight);
