@@ -35,21 +35,36 @@ export const Route = createFileRoute("/school/grading")({
 
 function GradingPage() {
   const { grading: cfg, refresh } = useSchoolData();
-  const [eight, setEight] = useState<EightBand[]>(cfg.eight);
-  const [cbc4, setCbc4] = useState<CBCBand[]>(cfg.cbc4);
-  const [cbc8, setCbc8] = useState<CBCBand[]>(cfg.cbc8);
-  const [split, setSplit] = useState(cfg.splitCBC);
-  const [meanRule, setMeanRule] = useState<MeanRule>(cfg.meanRule);
-  const [bestN, setBestN] = useState(cfg.bestN);
-  const [rollup, setRollup] = useState<CBCRollup>(cfg.cbcRollup);
-  const [internal, setInternal] = useState(cfg.cbcInternalAnalytics);
+  const [eight, rawSetEight] = useState<EightBand[]>(cfg.eight);
+  const [cbc4, rawSetCbc4] = useState<CBCBand[]>(cfg.cbc4);
+  const [cbc8, rawSetCbc8] = useState<CBCBand[]>(cfg.cbc8);
+  const [split, rawSetSplit] = useState(cfg.splitCBC);
+  const [meanRule, rawSetMeanRule] = useState<MeanRule>(cfg.meanRule);
+  const [bestN, rawSetBestN] = useState(cfg.bestN);
+  const [rollup, rawSetRollup] = useState<CBCRollup>(cfg.cbcRollup);
+  const [internal, rawSetInternal] = useState(cfg.cbcInternalAnalytics);
   const [dirty, setDirty] = useState(false);
+
+  // Any manual edit stops the server value from overwriting the editor.
+  const touch = <T,>(fn: React.Dispatch<React.SetStateAction<T>>) => (v: React.SetStateAction<T>) => {
+    setDirty(true);
+    fn(v);
+  };
+  const setEight = touch(rawSetEight);
+  const setCbc4 = touch(rawSetCbc4);
+  const setCbc8 = touch(rawSetCbc8);
+  const setSplit = touch(rawSetSplit);
+  const setMeanRule = touch(rawSetMeanRule);
+  const setBestN = touch(rawSetBestN);
+  const setRollup = touch(rawSetRollup);
+  const setInternal = touch(rawSetInternal);
+
 
   // Hydrate the editor once the school's stored configuration arrives.
   useEffect(() => {
     if (dirty) return;
-    setEight(cfg.eight); setCbc4(cfg.cbc4); setCbc8(cfg.cbc8); setSplit(cfg.splitCBC);
-    setMeanRule(cfg.meanRule); setBestN(cfg.bestN); setRollup(cfg.cbcRollup); setInternal(cfg.cbcInternalAnalytics);
+    rawSetEight(cfg.eight); rawSetCbc4(cfg.cbc4); rawSetCbc8(cfg.cbc8); rawSetSplit(cfg.splitCBC);
+    rawSetMeanRule(cfg.meanRule); rawSetBestN(cfg.bestN); rawSetRollup(cfg.cbcRollup); rawSetInternal(cfg.cbcInternalAnalytics);
   }, [cfg, dirty]);
 
   const eightErr = validateBands(eight);
@@ -80,8 +95,8 @@ function GradingPage() {
 
   function resetAll() {
     setDirty(false);
-    setEight(cfg.eight); setCbc4(cfg.cbc4); setCbc8(cfg.cbc8); setSplit(cfg.splitCBC);
-    setMeanRule(cfg.meanRule); setBestN(cfg.bestN); setRollup(cfg.cbcRollup); setInternal(cfg.cbcInternalAnalytics);
+    rawSetEight(cfg.eight); rawSetCbc4(cfg.cbc4); rawSetCbc8(cfg.cbc8); rawSetSplit(cfg.splitCBC);
+    rawSetMeanRule(cfg.meanRule); rawSetBestN(cfg.bestN); rawSetRollup(cfg.cbcRollup); rawSetInternal(cfg.cbcInternalAnalytics);
   }
 
   return (
@@ -92,7 +107,10 @@ function GradingPage() {
         action={
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" onClick={resetAll}><RotateCcw className="mr-1 h-4 w-4" />Revert</Button>
-            <Button size="sm" onClick={save}><Save className="mr-1 h-4 w-4" />Save configuration</Button>
+            <Button size="sm" onClick={save} disabled={mutation.isPending}>
+              {mutation.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Save className="mr-1 h-4 w-4" />}
+              Save configuration
+            </Button>
           </div>
         }
       />
