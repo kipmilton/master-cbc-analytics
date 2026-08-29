@@ -95,8 +95,8 @@ function GradingPage() {
 
   function resetAll() {
     setDirty(false);
-    setEight(cfg.eight); setCbc4(cfg.cbc4); setCbc8(cfg.cbc8); setSplit(cfg.splitCBC);
-    setMeanRule(cfg.meanRule); setBestN(cfg.bestN); setRollup(cfg.cbcRollup); setInternal(cfg.cbcInternalAnalytics);
+    rawSetEight(cfg.eight); rawSetCbc4(cfg.cbc4); rawSetCbc8(cfg.cbc8); rawSetSplit(cfg.splitCBC);
+    rawSetMeanRule(cfg.meanRule); rawSetBestN(cfg.bestN); rawSetRollup(cfg.cbcRollup); rawSetInternal(cfg.cbcInternalAnalytics);
   }
 
   return (
@@ -107,7 +107,10 @@ function GradingPage() {
         action={
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" onClick={resetAll}><RotateCcw className="mr-1 h-4 w-4" />Revert</Button>
-            <Button size="sm" onClick={save}><Save className="mr-1 h-4 w-4" />Save configuration</Button>
+            <Button size="sm" onClick={save} disabled={mutation.isPending}>
+              {mutation.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Save className="mr-1 h-4 w-4" />}
+              Save configuration
+            </Button>
           </div>
         }
       />
