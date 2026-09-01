@@ -8,15 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useSession } from "@/hooks/use-session";
-import { useStreams } from "@/lib/stream-store";
-import { useSubjects } from "@/lib/subject-store";
-import { useStudents } from "@/lib/student-store";
-import { useExams, examMean, EXAM_TERMS, type ExamEntry, type CBCRubric } from "@/lib/exam-store";
-import { scoreToGrade } from "@/lib/mock-data";
+import { useSchoolData } from "@/hooks/use-school-data";
+import { saveExam, setExamLocked, deleteExam, type CBCRubric, type ExamEntry } from "@/lib/school-data.functions";
+import { EXAM_TERMS, RUBRICS, examMean, scoreToGrade } from "@/lib/analytics";
+import { useMutation } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Lock, LockOpen, Pencil, Trash2, Save } from "lucide-react";
+import { Plus, Lock, LockOpen, Pencil, Trash2, Save, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/school/exams")({
   head: () => ({
@@ -32,103 +30,95 @@ export const Route = createFileRoute("/school/exams")({
   component: AdminExamsPage,
 });
 
-const RUBRICS: CBCRubric[] = ["EE", "ME", "AE", "BE"];
-
 function AdminExamsPage() {
-  const user = useSession();
-  const schoolId = user?.schoolId ?? "s1";
-  const [streams] = useStreams();
-  const [subjects] = useSubjects();
-  const [students] = useStudents();
-  const [exams, setExams] = useExams();
+  const { streams, subjects, students, exams, isLoading, refresh } = useSchoolData();
 
-  const schoolStreams = streams.filter((s) => s.schoolId === schoolId);
-  const schoolSubjects = subjects.filter((s) => s.schoolId === schoolId && s.approved);
-  const schoolExams = exams.filter((e) => e.schoolId === schoolId);
+  const approvedSubjects = subjects.filter((s) => s.approved);
 
   const [filterStream, setFilterStream] = useState("all");
   const [filterTerm, setFilterTerm] = useState("all");
 
-  const rows = schoolExams.filter(
+  const rows = exams.filter(
     (e) => (filterStream === "all" || e.streamId === filterStream) && (filterTerm === "all" || e.term === filterTerm),
   );
 
-  // ----- create form -----
   const [newStream, setNewStream] = useState("");
   const [newSubject, setNewSubject] = useState("");
-  const [newTerm, setNewTerm] = useState("Term 2 - End");
+  const [newTerm, setNewTerm] = useState(EXAM_TERMS[5]);
   const [newName, setNewName] = useState("End Term Exam");
 
-  const createStream = schoolStreams.find((s) => s.id === newStream);
-  const createSubjects = createStream ? schoolSubjects.filter((s) => s.system === createStream.system) : schoolSubjects;
+  const createStream = streams.find((s) => s.id === newStream);
+  const createSubjects = createStream ? approvedSubjects.filter((s) => s.system === createStream.system) : approvedSubjects;
 
-  function createExam() {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<Record<string, number | CBCRubric | undefined>>({});
+  const editing = useMemo(() => exams.find((e) => e.id === editingId) ?? null, [exams, editingId]);
+  const editingRoster = editing ? students.filter((s) => s.streamId === editing.streamId && s.status === "active") : [];
+
+  const save = useMutation({
+    mutationFn: (input: Parameters<typeof saveExam>[0]["data"]) => saveExam({ data: input }),
+    onSuccess: () => refresh(),
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Could not save the exam record"),
+  });
+
+  const lock = useMutation({
+    mutationFn: (input: { id: string; locked: boolean }) => setExamLocked({ data: input }),
+    onSuccess: (_r, v) => {
+      refresh();
+      toast.success(v.locked ? "Exam locked — now counted in analytics." : "Exam unlocked for editing.");
+    },
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Could not change the lock state"),
+  });
+
+  const remove = useMutation({
+    mutationFn: (id: string) => deleteExam({ data: { id } }),
+    onSuccess: () => { refresh(); toast.success("Exam record deleted."); },
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Could not delete the exam record"),
+  });
+
+  async function createExam() {
     if (!newStream || !newSubject) return toast.error("Pick a stream and a subject");
-    const stream = schoolStreams.find((s) => s.id === newStream)!;
+    const stream = streams.find((s) => s.id === newStream)!;
     const roster = students.filter((s) => s.streamId === newStream && s.status === "active");
     if (!roster.length) return toast.error("That stream has no active learners yet");
-    const entry: ExamEntry = {
-      id: `ex-${Date.now()}`,
-      schoolId,
+    await save.mutateAsync({
       streamId: newStream,
       subjectId: newSubject,
-      teacherId: stream.classTeacherId ?? user?.id ?? "admin",
       term: newTerm,
       examName: newName.trim() || newTerm,
       system: stream.system,
       locked: false,
-      createdAt: new Date().toISOString().slice(0, 10),
-      scores: roster.map((s) => (stream.system === "8-4-4" ? { studentId: s.id } : { studentId: s.id, rubric: "ME" as CBCRubric })),
-    };
-    setExams([...exams, entry]);
-    setEditingId(entry.id);
-    setDraft(Object.fromEntries(entry.scores.map((s) => [s.studentId, stream.system === "8-4-4" ? s.score : s.rubric])));
-    toast.success("Exam record created — enter the marks.");
+      scores: roster.map((s) =>
+        stream.system === "8-4-4" ? { studentId: s.id } : { studentId: s.id, rubric: "ME" as CBCRubric },
+      ),
+    });
+    toast.success("Exam record created — open it to enter the marks.");
   }
-
-  // ----- editing -----
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [draft, setDraft] = useState<Record<string, number | CBCRubric | undefined>>({});
-  const editing = useMemo(() => schoolExams.find((e) => e.id === editingId) ?? null, [schoolExams, editingId]);
-  const editingRoster = editing ? students.filter((s) => s.streamId === editing.streamId && s.status === "active") : [];
 
   function openEditor(ex: ExamEntry) {
     setEditingId(ex.id);
-    setDraft(
-      Object.fromEntries(ex.scores.map((s) => [s.studentId, ex.system === "8-4-4" ? s.score : s.rubric])),
-    );
+    setDraft(Object.fromEntries(ex.scores.map((s) => [s.studentId, ex.system === "8-4-4" ? s.score : s.rubric])));
   }
 
-  function saveEditor() {
+  async function saveEditor() {
     if (!editing) return;
-    const next = exams.map((e) =>
-      e.id === editing.id
-        ? {
-            ...e,
-            scores: editingRoster.map((stu) => {
-              const v = draft[stu.id];
-              return editing.system === "8-4-4"
-                ? { studentId: stu.id, score: typeof v === "number" ? v : undefined }
-                : { studentId: stu.id, rubric: (typeof v === "string" ? v : "ME") as CBCRubric };
-            }),
-          }
-        : e,
-    );
-    setExams(next);
+    await save.mutateAsync({
+      id: editing.id,
+      streamId: editing.streamId,
+      subjectId: editing.subjectId,
+      term: editing.term,
+      examName: editing.examName,
+      system: editing.system,
+      locked: editing.locked,
+      scores: editingRoster.map((stu) => {
+        const v = draft[stu.id];
+        return editing.system === "8-4-4"
+          ? { studentId: stu.id, score: typeof v === "number" ? v : undefined }
+          : { studentId: stu.id, rubric: (typeof v === "string" ? v : "ME") as CBCRubric };
+      }),
+    });
     setEditingId(null);
     toast.success("Marks saved — dashboards updated.");
-  }
-
-  function toggleLock(id: string) {
-    const next = exams.map((e) => (e.id === id ? { ...e, locked: !e.locked } : e));
-    setExams(next);
-    const now = next.find((e) => e.id === id);
-    toast.success(now?.locked ? "Exam locked — now counted in analytics." : "Exam unlocked for editing.");
-  }
-
-  function removeExam(id: string) {
-    setExams(exams.filter((e) => e.id !== id));
-    toast.success("Exam record deleted.");
   }
 
   const subjectName = (id: string) => subjects.find((s) => s.id === id)?.name ?? "—";
@@ -152,7 +142,7 @@ function AdminExamsPage() {
               <Label>Stream</Label>
               <Select value={newStream} onValueChange={(v) => { setNewStream(v); setNewSubject(""); }}>
                 <SelectTrigger><SelectValue placeholder="Pick stream" /></SelectTrigger>
-                <SelectContent>{schoolStreams.map((s) => <SelectItem key={s.id} value={s.id}>{s.grade} {s.name} ({s.system})</SelectItem>)}</SelectContent>
+                <SelectContent>{streams.map((s) => <SelectItem key={s.id} value={s.id}>{s.grade} {s.name} ({s.system})</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div className="grid gap-2">
@@ -173,7 +163,10 @@ function AdminExamsPage() {
               <Label>Exam name</Label>
               <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="e.g. End Term Exam" />
             </div>
-            <Button className="w-full" onClick={createExam}><Plus className="mr-1 h-4 w-4" />Create & enter marks</Button>
+            <Button className="w-full" onClick={createExam} disabled={save.isPending}>
+              {save.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Plus className="mr-1 h-4 w-4" />}
+              Create & enter marks
+            </Button>
             <p className="text-[11px] text-muted-foreground">
               Only <strong>locked</strong> records feed the composite means, trends and grade distributions.
             </p>
@@ -188,7 +181,7 @@ function AdminExamsPage() {
                 <SelectTrigger className="h-8 w-40 text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All streams</SelectItem>
-                  {schoolStreams.map((s) => <SelectItem key={s.id} value={s.id}>{s.grade} {s.name}</SelectItem>)}
+                  {streams.map((s) => <SelectItem key={s.id} value={s.id}>{s.grade} {s.name}</SelectItem>)}
                 </SelectContent>
               </Select>
               <Select value={filterTerm} onValueChange={setFilterTerm}>
@@ -212,7 +205,10 @@ function AdminExamsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {rows.length === 0 && (
+                {isLoading && (
+                  <tr><td colSpan={5} className="px-4 py-6 text-center text-xs text-muted-foreground">Loading exam records…</td></tr>
+                )}
+                {!isLoading && rows.length === 0 && (
                   <tr><td colSpan={5} className="px-4 py-6 text-center text-xs text-muted-foreground">No exam records match this filter.</td></tr>
                 )}
                 {rows.map((ex) => {
@@ -236,10 +232,12 @@ function AdminExamsPage() {
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-1">
                           <Button size="sm" variant="ghost" onClick={() => openEditor(ex)}><Pencil className="h-4 w-4" /></Button>
-                          <Button size="sm" variant="ghost" onClick={() => toggleLock(ex.id)}>
+                          <Button size="sm" variant="ghost" disabled={lock.isPending} onClick={() => lock.mutate({ id: ex.id, locked: !ex.locked })}>
                             {ex.locked ? <LockOpen className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                           </Button>
-                          <Button size="sm" variant="ghost" onClick={() => removeExam(ex.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                          <Button size="sm" variant="ghost" disabled={remove.isPending} onClick={() => remove.mutate(ex.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -306,7 +304,9 @@ function AdminExamsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditingId(null)}>Cancel</Button>
-            <Button onClick={saveEditor}><Save className="mr-1 h-4 w-4" />Save marks</Button>
+            <Button onClick={saveEditor} disabled={save.isPending}>
+              {save.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Save className="mr-1 h-4 w-4" />}Save marks
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
