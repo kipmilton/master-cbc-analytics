@@ -73,7 +73,7 @@ function ExamEntryPage() {
   const avg = filled.length ? filled.reduce((a, s) => a + (scores[s.id] ?? 0), 0) / filled.length : 0;
 
   const save = useMutation({
-    mutationFn: (input: Parameters<typeof saveExam>[0]["data"]) => saveExam({ data: input }),
+    mutationFn: (input: NonNullable<Parameters<typeof saveExam>[0]>["data"]) => saveExam({ data: input }),
     onSuccess: () => {
       refresh();
       setLocked(true);

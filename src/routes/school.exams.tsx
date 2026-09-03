@@ -44,7 +44,7 @@ function AdminExamsPage() {
 
   const [newStream, setNewStream] = useState("");
   const [newSubject, setNewSubject] = useState("");
-  const [newTerm, setNewTerm] = useState(EXAM_TERMS[5]);
+  const [newTerm, setNewTerm] = useState<string>(EXAM_TERMS[5]);
   const [newName, setNewName] = useState("End Term Exam");
 
   const createStream = streams.find((s) => s.id === newStream);
@@ -56,7 +56,7 @@ function AdminExamsPage() {
   const editingRoster = editing ? students.filter((s) => s.streamId === editing.streamId && s.status === "active") : [];
 
   const save = useMutation({
-    mutationFn: (input: Parameters<typeof saveExam>[0]["data"]) => saveExam({ data: input }),
+    mutationFn: (input: NonNullable<Parameters<typeof saveExam>[0]>["data"]) => saveExam({ data: input }),
     onSuccess: () => refresh(),
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Could not save the exam record"),
   });

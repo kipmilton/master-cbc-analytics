@@ -71,7 +71,7 @@ function StaffPage() {
   const seatTaken = (r: string) => admins.some((a) => a.role === r);
 
   const create = useMutation({
-    mutationFn: (input: Parameters<typeof createSchoolStaff>[0]["data"]) => createSchoolStaff({ data: input }),
+    mutationFn: (input: NonNullable<Parameters<typeof createSchoolStaff>[0]>["data"]) => createSchoolStaff({ data: input }),
     onSuccess: (_r, v) => {
       invalidate();
       setSummary({ email: v.email, password: v.tempPassword });
