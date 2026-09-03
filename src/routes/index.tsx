@@ -3,7 +3,12 @@ import { PublicNav, PublicFooter } from "@/components/PublicChrome";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, BarChart3, BookOpenCheck, ShieldCheck, Users, GraduationCap, LineChart, Building2, CheckCircle2 } from "lucide-react";
-import { testimonials } from "@/lib/mock-data";
+const testimonials = [
+  { name: "Mr. Wycliffe Onyango", title: "Principal, Lakeside Secondary", quote: "Master CBC cut our results processing from three days to under an hour. Our staff actually look forward to exam season now." },
+  { name: "Mrs. Hellen Wairimu", title: "Deputy Principal, Karen Girls", quote: "The stream comparisons are pure gold. We finally see exactly where each class needs attention." },
+  { name: "Mr. Samuel Kiptoo", title: "Teacher, Eldoret Boys", quote: "Entering CBC rubric marks is finally simple. The instant analytics keep me honest as a subject teacher." },
+  { name: "Ms. Beatrice Njoki", title: "Principal, Thika Hill Academy", quote: "Two admin seats with shared visibility is exactly how our office runs. It just fits Kenyan schools." },
+];
 import { ContactInquiryForm } from "@/components/ContactInquiryForm";
 
 export const Route = createFileRoute("/")({
