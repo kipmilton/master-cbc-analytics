@@ -104,7 +104,7 @@ export async function mapSnapshot(caller: Caller): Promise<SchoolSnapshot> {
     students: (students.data ?? []).map(toStudent),
     exams: (exams.data ?? []).map(toExam),
     rosters: (rosters.data ?? []).map(toRoster),
-    gradingConfig: (grading.data?.config as Record<string, unknown>) ?? null,
+    gradingConfig: (grading.data?.config as Record<string, import("./school-data.functions").JsonValue>) ?? null,
   };
 }
 

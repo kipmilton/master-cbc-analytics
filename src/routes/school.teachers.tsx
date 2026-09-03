@@ -40,6 +40,16 @@ export const Route = createFileRoute("/school/teachers")({
 
 type AssignableRole = (typeof ASSIGNABLE_STAFF_ROLES)[number];
 
+interface StaffInput {
+  role: AssignableRole;
+  name: string;
+  email: string;
+  title: string;
+  tempPassword: string;
+  streamIds: string[];
+  subjectIds: string[];
+}
+
 const DEFAULT_PASSWORD = "Master@2026";
 
 function StaffPage() {
@@ -71,8 +81,8 @@ function StaffPage() {
   const seatTaken = (r: string) => admins.some((a) => a.role === r);
 
   const create = useMutation({
-    mutationFn: (input: Parameters<typeof createSchoolStaff>[0]["data"]) => createSchoolStaff({ data: input }),
-    onSuccess: (_r, v) => {
+    mutationFn: (input: StaffInput) => createSchoolStaff({ data: input }),
+    onSuccess: (_r: unknown, v: StaffInput) => {
       invalidate();
       setSummary({ email: v.email, password: v.tempPassword });
       toast.success(`${v.name} can now sign in and will be asked to set a new password.`);

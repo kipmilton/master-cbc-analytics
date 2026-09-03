@@ -4,6 +4,8 @@ import { requireAuth } from "./auth-middleware";
 
 /* ------------------------------------------------------------------ types -- */
 
+export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+
 export type SystemType = "CBC" | "8-4-4";
 export type CBCRubric = "EE" | "ME" | "AE" | "BE";
 export type Gender = "M" | "F";
@@ -80,7 +82,7 @@ export interface SchoolSnapshot {
   students: Student[];
   exams: ExamEntry[];
   rosters: RosterSubmission[];
-  gradingConfig: Record<string, unknown> | null;
+  gradingConfig: Record<string, JsonValue> | null;
 }
 
 /* ------------------------------------------------------------- read path -- */
