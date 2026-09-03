@@ -40,7 +40,15 @@ export const Route = createFileRoute("/school/teachers")({
 
 type AssignableRole = (typeof ASSIGNABLE_STAFF_ROLES)[number];
 
-type StaffInput = NonNullable<Parameters<typeof createSchoolStaff>[0]>["data"];
+interface StaffInput {
+  role: AssignableRole;
+  name: string;
+  email: string;
+  title: string;
+  tempPassword: string;
+  streamIds: string[];
+  subjectIds: string[];
+}
 
 const DEFAULT_PASSWORD = "Master@2026";
 
