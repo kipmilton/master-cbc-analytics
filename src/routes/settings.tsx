@@ -56,8 +56,10 @@ function SettingsPage() {
       await updateMyProfile({
         data: {
           fullName: fullName.trim(),
+          ...(title.trim() ? { title: title.trim() } : {}),
         },
       });
+      await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
       await queryClient.invalidateQueries();
       toast.success("Profile updated successfully!");
     } catch (err) {
