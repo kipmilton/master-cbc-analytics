@@ -66,7 +66,7 @@ function PendingApprovalPage() {
               {isRejected ? "Application Rejected" : "Pending Approval"}
             </Badge>
           </div>
-          <h1 className="mt-4 text-2xl font-bold">Hi {user.name.split(" ")[0]},</h1>
+          <h1 className="mt-4 text-2xl font-bold">Hi {user.name?.trim().split(" ")[0] || "there"},</h1>
           <div className="mt-3 space-y-3 text-sm text-muted-foreground">
             {isRejected ? (
               <p>Your school application was not approved at this time. Please contact <a className="text-primary underline" href="mailto:hello@mastercbc.co.ke">hello@mastercbc.co.ke</a> for details.</p>
@@ -84,6 +84,15 @@ function PendingApprovalPage() {
               <li>All data is protected with row-level security — you'll only ever see your own school's records.</li>
             </ul>
           </div>
+          {!isRejected && (
+            <div className="mt-6 flex items-center gap-3">
+              <Button size="sm" variant="outline" onClick={checkNow} disabled={checking}>
+                <RefreshCw className={`mr-2 h-4 w-4 ${checking ? "animate-spin" : ""}`} />
+                {checking ? "Checking…" : "Check approval status"}
+              </Button>
+              <span className="text-xs text-muted-foreground">We also check automatically every few seconds.</span>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
