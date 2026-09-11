@@ -31,6 +31,7 @@ function SettingsPage() {
   const queryClient = useQueryClient();
 
   const [fullName, setFullName] = useState("");
+  const [title, setTitle] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
 
   const [newPassword, setNewPassword] = useState("");
@@ -41,6 +42,7 @@ function SettingsPage() {
   useEffect(() => {
     if (user) {
       setFullName(user.name ?? "");
+      setTitle(user.title ?? "");
     }
   }, [user]);
 
