@@ -5,7 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Logo } from "@/components/Logo";
 import { useSession } from "@/hooks/use-session";
 import { signOut, landingPathFor } from "@/lib/auth-store";
-import { Clock3, ShieldCheck } from "lucide-react";
+import { Clock3, ShieldCheck, RefreshCw } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/pending-approval")({
   head: () => ({ meta: [{ title: "Pending Approval — Master CBC" }] }),
