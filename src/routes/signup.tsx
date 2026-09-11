@@ -8,6 +8,7 @@ import { Logo } from "@/components/Logo";
 import { toast } from "sonner";
 import { useState } from "react";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { submitSchoolApplication } from "@/lib/tenants.functions";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({ meta: [{ title: "Register your school — Master CBC" }] }),
@@ -45,95 +46,29 @@ function SignupPage() {
         return toast.error("Please fill in all required fields.");
       }
 
-      const { supabase } = await import("@/lib/supabase");
-
-      let userId: string | null = null;
-      let hasSession = false;
-
-      // 1. Sign up user directly with Supabase Auth
-      const { data: authData, error: authErr } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { name: principalName, title: "Principal" },
+      // 1. Create the account and store the application server-side (bypasses RLS safely)
+      await submitSchoolApplication({
+        data: {
+          email,
+          password,
+          schoolName,
+          county,
+          phone,
+          system,
+          principalName,
+          principalTitle: "Principal",
         },
       });
 
-      const isAlreadyRegistered =
-        (authErr && /already registered|already exists/i.test(authErr.message)) ||
-        (!authErr && authData?.user && authData.user.identities && authData.user.identities.length === 0);
-
-      if (isAlreadyRegistered) {
-        // User already exists in Auth; verify password by signing in
-        const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (signInErr || !signInData?.user) {
-          throw new Error(
-            "An account with this email already exists. Please sign in with your password on the login page or use a different email.",
-          );
-        }
-
-        userId = signInData.user.id;
-        hasSession = Boolean(signInData.session);
-      } else if (authErr) {
-        throw new Error(authErr.message);
-      } else {
-        userId = authData.user?.id ?? null;
-        hasSession = Boolean(authData.session);
-      }
-
-      // 2. If signed up without immediate session, attempt signIn
-      if (!hasSession) {
-        const { data: sData } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (sData?.session) {
-          hasSession = true;
-          userId = sData.user.id;
-        }
-      }
-
-      // 3. Upsert profile and school application records
-      if (userId) {
-        try {
-          await Promise.allSettled([
-            supabase.from("profiles").upsert({
-              user_id: userId,
-              email,
-              full_name: principalName,
-              title: "Principal",
-              role: null,
-              school_id: null,
-              must_reset_password: false,
-            }),
-            supabase.from("school_applications").upsert(
-              {
-                user_id: userId,
-                school_name: schoolName,
-                county,
-                phone,
-                system,
-                principal_name: principalName,
-                principal_title: "Principal",
-                status: "pending",
-              },
-              { onConflict: "user_id" },
-            ),
-          ]);
-        } catch (dbErr) {
-          console.warn("Application record sync notice:", dbErr);
-        }
-      }
+      // 2. Sign the applicant in so they land straight on their status page
+      const { supabase } = await import("@/lib/supabase");
+      const { data: sData } = await supabase.auth.signInWithPassword({ email, password });
 
       toast.success("School application submitted! Your account is under review.");
 
       if (typeof window !== "undefined") window.dispatchEvent(new Event("mastercbc:auth"));
 
-      if (hasSession) {
+      if (sData?.session) {
         navigate({ to: "/pending-approval" });
       } else {
         toast.info("Application submitted! Please sign in with your email and password.");

@@ -148,26 +148,24 @@ export const updateMyProfile = createServerFn({ method: "POST" })
     const { getSupabaseAdmin } = await import("./supabase-admin.server");
     const admin = getSupabaseAdmin();
 
-    // 1. Try updating the profiles table (requires service_role key for the live schema)
-    let profileSaved = false;
-    try {
-      const { error: profErr } = await admin.from("profiles").upsert({
-        user_id: context.userId,
-        email: context.email,
-        full_name: data.fullName,
-        title: data.title ?? null,
-      });
-      if (!profErr) profileSaved = true;
-    } catch {
-      /* may fail without service role access */
-    }
+    // 1. Save on the profiles table without clobbering fields we were not given
+    const patch: Record<string, unknown> = {
+      user_id: context.userId,
+      email: context.email,
+      full_name: data.fullName,
+    };
+    if (data.title !== undefined && data.title !== "") patch['title'] = data.title;
 
-    // 2. Try updating the school application record
+    const { error: profErr } = await admin
+      .from("profiles")
+      .upsert(patch, { onConflict: "user_id" });
+    if (profErr) throw new Error(profErr.message);
+
+    // 2. Keep the school application record in sync (soft-fail: may not exist)
     try {
-      await admin.from("school_applications").update({
-        principal_name: data.fullName,
-        principal_title: data.title ?? "Principal",
-      }).eq("user_id", context.userId);
+      const appPatch: Record<string, unknown> = { principal_name: data.fullName };
+      if (data.title) appPatch['principal_title'] = data.title;
+      await admin.from("school_applications").update(appPatch).eq("user_id", context.userId);
     } catch {
       /* soft-fail */
     }
