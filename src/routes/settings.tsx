@@ -31,6 +31,7 @@ function SettingsPage() {
   const queryClient = useQueryClient();
 
   const [fullName, setFullName] = useState("");
+  const [title, setTitle] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
 
   const [newPassword, setNewPassword] = useState("");
@@ -41,6 +42,7 @@ function SettingsPage() {
   useEffect(() => {
     if (user) {
       setFullName(user.name ?? "");
+      setTitle(user.title ?? "");
     }
   }, [user]);
 
@@ -54,8 +56,10 @@ function SettingsPage() {
       await updateMyProfile({
         data: {
           fullName: fullName.trim(),
+          ...(title.trim() ? { title: title.trim() } : {}),
         },
       });
+      await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
       await queryClient.invalidateQueries();
       toast.success("Profile updated successfully!");
     } catch (err) {
@@ -160,6 +164,21 @@ function SettingsPage() {
                       required
                       placeholder="e.g. Jane Doe"
                     />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="title" className="text-xs font-semibold">
+                      Display Title
+                    </Label>
+                    <Input
+                      id="title"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="e.g. The Principal"
+                    />
+                    <p className="text-[11px] text-muted-foreground">
+                      Shown under your greeting on the dashboard.
+                    </p>
                   </div>
 
                   <div className="pt-2">

@@ -5,7 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Logo } from "@/components/Logo";
 import { useSession } from "@/hooks/use-session";
 import { signOut, landingPathFor } from "@/lib/auth-store";
-import { Clock3, ShieldCheck } from "lucide-react";
+import { Clock3, ShieldCheck, RefreshCw } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/pending-approval")({
   head: () => ({ meta: [{ title: "Pending Approval — Master CBC" }] }),
@@ -15,10 +17,36 @@ export const Route = createFileRoute("/pending-approval")({
 function PendingApprovalPage() {
   const user = useSession();
   const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [checking, setChecking] = useState(false);
 
-  if (user === undefined) return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Loading…</div>;
-  if (user === null) { navigate({ to: "/login", replace: true }); return null; }
-  if (user.accountStatus === "active") { navigate({ to: landingPathFor(user.role), replace: true }); return null; }
+  // Move on automatically the moment the platform team approves the school.
+  useEffect(() => {
+    if (user === null) { navigate({ to: "/login", replace: true }); return; }
+    if (user && user.accountStatus === "active") {
+      navigate({ to: landingPathFor(user.role), replace: true });
+    }
+  }, [user, navigate]);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      void qc.invalidateQueries({ queryKey: ["currentUser"] });
+    }, 20000);
+    return () => clearInterval(id);
+  }, [qc]);
+
+  async function checkNow() {
+    setChecking(true);
+    try {
+      await qc.invalidateQueries({ queryKey: ["currentUser"] });
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  if (user === undefined || user === null) return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Loading…</div>;
+  if (user.accountStatus === "active") return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Taking you to your dashboard…</div>;
+
 
   const schoolAdminRoles = ["principal", "deputy_academic", "deputy_admin"] as const;
   const isPrincipalApp = user.applicationStatus === "pending" || ((schoolAdminRoles as readonly string[]).includes(user.role) && user.schoolStatus !== "active");
@@ -38,7 +66,7 @@ function PendingApprovalPage() {
               {isRejected ? "Application Rejected" : "Pending Approval"}
             </Badge>
           </div>
-          <h1 className="mt-4 text-2xl font-bold">Hi {user.name.split(" ")[0]},</h1>
+          <h1 className="mt-4 text-2xl font-bold">Hi {user.name?.trim().split(" ")[0] || "there"},</h1>
           <div className="mt-3 space-y-3 text-sm text-muted-foreground">
             {isRejected ? (
               <p>Your school application was not approved at this time. Please contact <a className="text-primary underline" href="mailto:hello@mastercbc.co.ke">hello@mastercbc.co.ke</a> for details.</p>
@@ -56,6 +84,15 @@ function PendingApprovalPage() {
               <li>All data is protected with row-level security — you'll only ever see your own school's records.</li>
             </ul>
           </div>
+          {!isRejected && (
+            <div className="mt-6 flex items-center gap-3">
+              <Button size="sm" variant="outline" onClick={checkNow} disabled={checking}>
+                <RefreshCw className={`mr-2 h-4 w-4 ${checking ? "animate-spin" : ""}`} />
+                {checking ? "Checking…" : "Check approval status"}
+              </Button>
+              <span className="text-xs text-muted-foreground">We also check automatically every few seconds.</span>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
