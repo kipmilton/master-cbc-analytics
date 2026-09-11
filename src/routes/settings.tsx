@@ -166,6 +166,21 @@ function SettingsPage() {
                     />
                   </div>
 
+                  <div className="grid gap-2">
+                    <Label htmlFor="title" className="text-xs font-semibold">
+                      Display Title
+                    </Label>
+                    <Input
+                      id="title"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="e.g. The Principal"
+                    />
+                    <p className="text-[11px] text-muted-foreground">
+                      Shown under your greeting on the dashboard.
+                    </p>
+                  </div>
+
                   <div className="pt-2">
                     <Button type="submit" disabled={savingProfile} className="flex items-center gap-2">
                       <Save className="h-4 w-4" />
