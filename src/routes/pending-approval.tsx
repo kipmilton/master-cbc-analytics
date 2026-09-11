@@ -17,10 +17,36 @@ export const Route = createFileRoute("/pending-approval")({
 function PendingApprovalPage() {
   const user = useSession();
   const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [checking, setChecking] = useState(false);
 
-  if (user === undefined) return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Loading…</div>;
-  if (user === null) { navigate({ to: "/login", replace: true }); return null; }
-  if (user.accountStatus === "active") { navigate({ to: landingPathFor(user.role), replace: true }); return null; }
+  // Move on automatically the moment the platform team approves the school.
+  useEffect(() => {
+    if (user === null) { navigate({ to: "/login", replace: true }); return; }
+    if (user && user.accountStatus === "active") {
+      navigate({ to: landingPathFor(user.role), replace: true });
+    }
+  }, [user, navigate]);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      void qc.invalidateQueries({ queryKey: ["currentUser"] });
+    }, 20000);
+    return () => clearInterval(id);
+  }, [qc]);
+
+  async function checkNow() {
+    setChecking(true);
+    try {
+      await qc.invalidateQueries({ queryKey: ["currentUser"] });
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  if (user === undefined || user === null) return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Loading…</div>;
+  if (user.accountStatus === "active") return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Taking you to your dashboard…</div>;
+
 
   const schoolAdminRoles = ["principal", "deputy_academic", "deputy_admin"] as const;
   const isPrincipalApp = user.applicationStatus === "pending" || ((schoolAdminRoles as readonly string[]).includes(user.role) && user.schoolStatus !== "active");
