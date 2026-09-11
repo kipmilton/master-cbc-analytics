@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useSession } from "@/hooks/use-session";
 import { useSchoolData } from "@/hooks/use-school-data";
 import { examMean, compositeMeanOf } from "@/lib/analytics";
+import { getGreeting } from "@/lib/utils";
 import { GraduationCap, BookOpen, Users, TrendingUp } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
@@ -44,8 +45,8 @@ function SchoolHome() {
   return (
     <AppShell allow={["school_admin"]}>
       <PageHeader
-        title={user?.schoolName ? `Welcome to ${user.schoolName}` : "Welcome to Master CBC"}
-        subtitle={`Signed in as ${user?.title ?? "school admin"}`}
+        title={getGreeting(user?.name)}
+        subtitle={user?.schoolName ? `Managing ${user.schoolName}` : "School Management Dashboard"}
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

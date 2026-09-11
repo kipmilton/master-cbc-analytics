@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/DashboardBits";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,7 +15,7 @@ import { submitRoster, type RosterSubmission, type Student } from "@/lib/school-
 import { useMutation } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Send, Trash2, Search, Plus, GraduationCap, Lock, Loader2 } from "lucide-react";
+import { Send, Trash2, Search, Plus, GraduationCap, Lock, Loader2, Printer } from "lucide-react";
 
 export const Route = createFileRoute("/teacher/my-class")({
   head: () => ({
@@ -71,7 +71,16 @@ function MyClassPage() {
       <PageHeader
         title={`My Class · ${myClass.grade} ${myClass.name}`}
         subtitle={`You are the Class Teacher for this ${myClass.system} stream.`}
-        action={<Badge className="bg-emerald-500/15 text-emerald-700">{streamRoster.length} approved learners</Badge>}
+        action={
+          <div className="flex items-center gap-2">
+            <Link to="/teacher/report-cards">
+              <Button size="sm" className="bg-[#E8672E] hover:bg-[#C6511F] text-white">
+                <Printer className="mr-1.5 h-4 w-4" /> Print Class Report Cards
+              </Button>
+            </Link>
+            <Badge className="bg-emerald-500/15 text-emerald-700">{streamRoster.length} approved learners</Badge>
+          </div>
+        }
       />
 
       <Tabs defaultValue="roster">

@@ -15,7 +15,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Master CBC — Performance Analytics for Kenyan Schools" },
-      { name: "description", content: "Multi-tenant analytics and revision platform for Kenyan CBC (Grades 7-12) and 8-4-4 (Form 3-4) schools." },
+      { name: "description", content: "Performance analytics and revision platform for Kenyan CBC (Grades 7-12) and 8-4-4 (Form 3-4) schools." },
       { property: "og:title", content: "Master CBC — Performance Analytics for Kenyan Schools" },
       { property: "og:description", content: "CBC rubric tracking, 8-4-4 grade analysis, and instant class mean computations." },
     ],
@@ -29,8 +29,8 @@ function LandingPage() {
       <PublicNav />
       <Hero />
       <Features />
-      <Testimonials />
-      <SocialProof />
+      <FoundingSchools />
+      <WhyWeBuiltThis />
       <ContactSection />
       <PublicFooter />
     </div>
@@ -45,10 +45,6 @@ function Hero() {
       <div className="absolute -left-32 bottom-0 -z-10 h-96 w-96 rounded-full bg-(--brand-blue)/10 blur-3xl" />
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:py-20">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-            <ShieldCheck className="h-3.5 w-3.5" />
-            Multi-tenant • RLS enforced • Kenya-first
-          </div>
           <h1 className="mt-5 text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
             Master <span className="text-primary">CBC</span>
           </h1>
@@ -64,8 +60,8 @@ function Hero() {
             </Button>
           </div>
           <div className="mt-6 grid grid-cols-3 gap-6 border-t border-border pt-5 text-sm">
-            <div><div className="text-2xl font-bold text-foreground">120+</div><div className="text-muted-foreground">Schools</div></div>
-            <div><div className="text-2xl font-bold text-foreground">48k</div><div className="text-muted-foreground">Learners</div></div>
+            <div><div className="text-2xl font-bold text-foreground">5+</div><div className="text-muted-foreground">Schools</div></div>
+            <div><div className="text-2xl font-bold text-foreground">1k</div><div className="text-muted-foreground">Learners</div></div>
             <div><div className="text-2xl font-bold text-foreground">99.9%</div><div className="text-muted-foreground">Uptime</div></div>
           </div>
         </div>
@@ -117,80 +113,241 @@ function Hero() {
 }
 
 function Features() {
-  const items = [
-    { icon: Users, title: "Multi-role access", body: "Super Admin, School Admin (2 seats), and unlimited Teachers — each with strictly scoped row-level access." },
-    { icon: BookOpenCheck, title: "CBC rubric tracking", body: "Capture EE, ME, AE and BE per learning area for Grades 7-12 with auto-rolled-up insights." },
-    { icon: GraduationCap, title: "8-4-4 grade analysis", body: "Form 3-4 percentage entry with KCSE-style grade conversion, mean score and mean points." },
-    { icon: LineChart, title: "Instant class mean", body: "Composite stream mean is auto-computed the moment subject teachers submit their marks." },
-    { icon: BarChart3, title: "Stream comparisons", body: "Side-by-side parallel-stream graphs: Grade 10 East vs West, Form 4 Blue vs Green." },
-    { icon: ShieldCheck, title: "Bank-grade tenancy", body: "Total data isolation between schools via Supabase Auth + strict RLS. Your data stays yours." },
+  const ledgerItems = [
+    {
+      idx: "01",
+      icon: Users,
+      title: "Role-based staff access",
+      body: "The school principal can add up to two deputy principals and the dean of studies, plus teachers assigned only to their own classes and subjects.",
+      evidence: (
+        <div className="flex flex-wrap gap-1.5 justify-end">
+          <span className="rounded-full border border-border bg-background px-2.5 py-0.5 text-xs font-semibold text-foreground">Principal</span>
+          <span className="rounded-full border border-border bg-background px-2.5 py-0.5 text-xs font-semibold text-foreground">Deputies & Dean</span>
+          <span className="rounded-full border border-border bg-background px-2.5 py-0.5 text-xs font-semibold text-foreground">Teachers</span>
+        </div>
+      ),
+    },
+    {
+      idx: "02",
+      icon: BookOpenCheck,
+      title: "CBC rubric tracking",
+      body: "Exceeding, Meeting, Approaching, and Below Expectation, captured per learning area for Grades 7–12, with the roll-up done for you.",
+      evidence: (
+        <div className="flex gap-2">
+          {[
+            { label: "EE", color: "#2F9E63" },
+            { label: "ME", color: "#3B5B92" },
+            { label: "AE", color: "#D98A2B" },
+            { label: "BE", color: "#C1554B" },
+          ].map((r) => (
+            <div key={r.label} className="flex min-w-8 flex-col items-center gap-1">
+              <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: r.color }} />
+              <span className="text-[10px] font-bold text-muted-foreground">{r.label}</span>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      idx: "03",
+      icon: GraduationCap,
+      title: "8-4-4 grade analysis",
+      body: "Form 3 and 4 percentage entry converts straight to KCSE-style grades, with mean score and mean points calculated for you.",
+      evidence: (
+        <div className="flex gap-1.5">
+          {["A", "B+", "C+"].map((t) => (
+            <span key={t} className="rounded bg-muted px-2 py-1 text-xs font-bold text-foreground font-mono">
+              {t}
+            </span>
+          ))}
+        </div>
+      ),
+    },
+    {
+      idx: "04",
+      icon: LineChart,
+      title: "Instant class mean",
+      body: "The moment a subject teacher submits marks, the class and stream composite mean recalculates — no waiting on a spreadsheet.",
+      evidence: (
+        <div className="flex h-7 items-end gap-1">
+          {[10, 16, 12, 22, 18, 26].map((h, i) => (
+            <span key={i} className="w-1.5 rounded-xs bg-primary" style={{ height: `${h}px` }} />
+          ))}
+        </div>
+      ),
+    },
+    {
+      idx: "05",
+      icon: BarChart3,
+      title: "Stream comparisons",
+      body: "Line up Grade 10 East against West, or Form 4 Blue against Green, side by side, term over term.",
+      evidence: (
+        <div className="w-40 sm:w-44 space-y-1.5">
+          <div className="flex items-center gap-2">
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+              <div className="h-full rounded-full bg-primary" style={{ width: "78%" }} />
+            </div>
+            <span className="w-7 text-right text-[10.5px] text-muted-foreground font-mono">78%</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+              <div className="h-full rounded-full bg-foreground/70" style={{ width: "71%" }} />
+            </div>
+            <span className="w-7 text-right text-[10.5px] text-muted-foreground font-mono">71%</span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      idx: "06",
+      icon: ShieldCheck,
+      title: "Complete school data privacy",
+      body: "Built so every school's records are completely isolated and private from any other school by default — not by configuration.",
+      evidence: (
+        <span className="rounded-md bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary uppercase tracking-wider">
+          100% Private
+        </span>
+      ),
+    },
   ];
+
   return (
-    <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-      <div className="mx-auto max-w-2xl text-center">
-        <h2 className="text-3xl font-bold sm:text-4xl">Why choose Master CBC?</h2>
-        <p className="mt-3 text-muted-foreground">A single platform that respects how Kenyan schools actually run — from staff room to principal's office.</p>
+    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+      <div className="mb-10 max-w-3xl">
+        <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          Built around how a Kenyan staff room actually runs
+        </h2>
+        <p className="mt-4 text-base text-muted-foreground sm:text-lg">
+          Every role sees exactly their own record — the principal&apos;s office, the staff room, and every subject teacher&apos;s mark sheet, kept in one system instead of six spreadsheets.
+        </p>
       </div>
-      <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((f) => (
-          <Card key={f.title} className="border-border/70 transition-shadow hover:shadow-lg">
-            <CardContent className="p-6">
-              <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <f.icon className="h-5 w-5" />
+
+      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+        <div className="flex items-center justify-between border-b border-border bg-muted/40 px-6 py-4 text-xs sm:text-sm">
+          <span className="text-muted-foreground">Master CBC — platform record</span>
+          <span className="font-semibold text-foreground">Term 2, 2026</span>
+        </div>
+
+        <div className="divide-y divide-border">
+          {ledgerItems.map((item) => (
+            <div key={item.idx} className="grid grid-cols-[auto_1fr] sm:grid-cols-[28px_24px_1fr_auto] gap-4 sm:gap-6 items-center p-5 sm:p-6">
+              <div className="text-xs font-mono text-muted-foreground">{item.idx}</div>
+              <div className="hidden sm:flex text-foreground items-center justify-center">
+                <item.icon className="h-5 w-5" />
               </div>
-              <h3 className="text-lg font-semibold">{f.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{f.body}</p>
+              <div>
+                <h3 className="text-base font-semibold text-foreground">{item.title}</h3>
+                <p className="mt-1 text-sm text-muted-foreground max-w-xl">{item.body}</p>
+              </div>
+              <div className="col-span-2 sm:col-span-1 flex items-center justify-start sm:justify-end">
+                {item.evidence}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-7 text-sm font-semibold">
+        <Link to="/signup" className="inline-flex items-center gap-1.5 text-primary hover:underline">
+          See how a report card gets built, start to finish <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+function FoundingSchools() {
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+      <div className="grid gap-10 rounded-2xl bg-[#1B3A66] p-8 sm:p-12 text-white lg:grid-cols-[1.15fr_0.85fr] lg:items-center shadow-lg">
+        <div>
+          <h2 className="text-3xl font-bold text-white sm:text-4xl">Join as a founding school</h2>
+          <p className="mt-4 text-base text-[#C7D0E2] sm:text-lg max-w-xl leading-relaxed">
+            Master CBC is new. Instead of asking you to trust a track record we don&apos;t have yet, we&apos;re asking a handful of schools to help us build the right one — and giving them the best terms we&apos;ll ever offer in return.
+          </p>
+          <ul className="mt-6 space-y-3 text-sm text-[#E4E9F2]">
+            {[
+              "Free access for your first full term",
+              "Direct line to the founder for setup and support",
+              "Your feedback shapes what we build next",
+            ].map((perk) => (
+              <li key={perk} className="flex items-start gap-3">
+                <CheckCircle2 className="h-5 w-5 shrink-0 text-[#E8672E] mt-0.5" />
+                <span>{perk}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-8 flex flex-wrap items-center gap-4">
+            <Button asChild size="lg" className="bg-[#E8672E] hover:bg-[#C6511F] text-white font-semibold px-6 py-3 border-none">
+              <Link to="/signup">Apply as a founding school</Link>
+            </Button>
+            <span className="text-xs text-[#9FAAC2]">Takes 2 minutes — we&apos;ll call you back</span>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-white/12 bg-white/5 p-6 sm:p-8 flex flex-col justify-center">
+          <span className="text-xs text-[#9FAAC2] font-medium">Founding cohort</span>
+          <div className="mt-2 text-4xl sm:text-5xl font-bold text-white font-serif">
+            0<span className="text-xl sm:text-2xl font-sans text-[#9FAAC2] font-normal">&nbsp;/&nbsp;20 spots</span>
+          </div>
+          <div className="mt-2 text-sm text-[#9FAAC2]">Open for Term 3, 2026</div>
+          <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-white/12">
+            <div className="h-full w-0 rounded-full bg-[#E8672E]" />
+          </div>
+          <div className="mt-3 text-xs text-[#7C88A3]">Closes once 20 schools are onboarded</div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function WhyWeBuiltThis() {
+  const cards = [
+    {
+      num: "01",
+      title: "Built for CBC, not adapted to it",
+      body: "Rubric grading (EE/ME/AE/BE) and 8-4-4 percentage grading live in the same system, because most schools are running both right now.",
+    },
+    {
+      num: "02",
+      title: "Every school's data stands alone",
+      body: "Built so one school's records are completely private and isolated from another — enforced at every level of the system.",
+    },
+    {
+      num: "03",
+      title: "Priced for how schools actually pay",
+      body: "No per-student licensing that punishes you for growing. One school, one flat plan, unlimited teachers.",
+    },
+  ];
+
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16 border-t border-border">
+      <div className="mb-10 max-w-2xl">
+        <h2 className="text-3xl font-bold text-foreground sm:text-4xl">Why we&apos;re building this</h2>
+        <p className="mt-4 text-base text-muted-foreground sm:text-lg">
+          We&apos;re not claiming a track record yet — here&apos;s what&apos;s actually true about the product today.
+        </p>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-3">
+        {cards.map((c) => (
+          <Card key={c.num} className="border-border/70 bg-card">
+            <CardContent className="p-6">
+              <span className="font-serif text-sm font-semibold text-primary">{c.num}</span>
+              <h3 className="mt-3 text-lg font-semibold text-foreground">{c.title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{c.body}</p>
             </CardContent>
           </Card>
         ))}
       </div>
-    </section>
-  );
-}
 
-function Testimonials() {
-  return (
-    <section className="bg-secondary/40 py-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold sm:text-4xl">Loved by educators across Kenya</h2>
-          <p className="mt-3 text-muted-foreground">Real feedback from principals and teachers in the classroom.</p>
-        </div>
-        <div className="mt-12 grid gap-5 md:grid-cols-2">
-          {testimonials.map((t) => (
-            <Card key={t.name} className="border-border/70">
-              <CardContent className="p-6">
-                <p className="text-foreground">&ldquo;{t.quote}&rdquo;</p>
-                <div className="mt-4 flex items-center gap-3 border-t border-border pt-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 font-semibold text-primary">
-                    {t.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold">{t.name}</div>
-                    <div className="text-xs text-muted-foreground">{t.title}</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function SocialProof() {
-  return (
-    <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-      <div className="rounded-2xl border border-border bg-card p-8 sm:p-10">
-        <h2 className="text-center text-2xl font-semibold">Trusted by leading schools across Kenya</h2>
-        <p className="mt-2 text-center text-sm text-muted-foreground">From Nairobi to Kisumu, Mombasa to Eldoret.</p>
-        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="flex h-20 items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 text-xs text-muted-foreground">
-              <Building2 className="mr-2 h-4 w-4" /> School Logo
-            </div>
-          ))}
+      <div className="mt-10 rounded-xl border border-dashed border-border bg-card p-6 sm:p-8">
+        <span className="text-xs font-medium text-muted-foreground">A note from the founder</span>
+        <p className="mt-3 text-base text-foreground italic leading-relaxed">
+          &ldquo;As a trained teacher, have spent my career teaching computer science. Every report card season looked the same — teachers hunched over mark sheets late into the evening, principals waiting on results they couldn&apos;t see coming, and no easy way for any of us to tell if a class was actually improving until it was too late to do anything about it. I built Master CBC because grading and lesson management shouldn&apos;t take more effort than teaching does.&rdquo;
+        </p>
+        <div className="mt-4 text-sm font-medium text-muted-foreground">
+          — Sophia Kariuki, Founder
         </div>
       </div>
     </section>

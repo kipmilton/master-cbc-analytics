@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/DashboardBits";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,7 +18,7 @@ import { listSchoolStaff, type StaffRow } from "@/lib/staff.functions";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Upload, UserMinus, UserX, Search, Plus, Loader2, Trash2 } from "lucide-react";
+import { Upload, UserMinus, UserX, Search, Plus, Loader2, Trash2, Printer } from "lucide-react";
 import * as XLSX from "xlsx";
 
 export const Route = createFileRoute("/school/students")({
@@ -131,6 +131,12 @@ function StudentsPage() {
         subtitle="The master pool of every learner in your school. Import rosters, manage lifecycle, and organise streams."
         action={
           <div className="flex gap-2">
+            <Link to="/teacher/report-cards">
+              <Button variant="outline">
+                <Printer className="mr-2 h-4 w-4" />
+                Print Report Cards
+              </Button>
+            </Link>
             <input
               ref={fileRef}
               type="file"

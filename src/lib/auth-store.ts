@@ -23,16 +23,32 @@ export interface AppUser {
 }
 
 export function profileToAppUser(p: MyProfile): AppUser {
+  if (p.role === "super_admin") {
+    return {
+      id: p.userId,
+      email: p.email,
+      name: p.name || "",
+      title: p.title ?? roleLabel("super_admin"),
+      role: "super_admin",
+      assignedStreams: [],
+      assignedSubjects: [],
+      classTeacherStreams: [],
+      accountStatus: "active",
+      requiresPasswordReset: p.mustResetPassword,
+      applicationStatus: p.applicationStatus ?? undefined,
+    };
+  }
+
   // Nobody gets a workspace until they hold a role inside an active school.
   const pending =
     p.role === null ||
     p.applicationStatus === "pending" ||
-    (p.role !== "super_admin" && p.schoolStatus !== "active");
+    p.schoolStatus !== "active";
 
   return {
     id: p.userId,
     email: p.email,
-    name: p.name || p.email,
+    name: p.name || "",
     title: p.title ?? (p.role ? roleLabel(p.role) : undefined),
     role: p.role ?? "unassigned",
     schoolId: p.schoolId ?? undefined,
@@ -78,6 +94,7 @@ export async function signIn(
     return { user: null, errorMessage: friendly };
   }
   const user = await loadCurrentUser();
+  if (typeof window !== "undefined") window.dispatchEvent(new Event("mastercbc:auth"));
   return { user, errorMessage: user ? null : "We could not load your profile. Please try again." };
 }
 

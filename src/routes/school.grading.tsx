@@ -43,6 +43,11 @@ function GradingPage() {
   const [bestN, rawSetBestN] = useState(cfg.bestN);
   const [rollup, rawSetRollup] = useState<CBCRollup>(cfg.cbcRollup);
   const [internal, rawSetInternal] = useState(cfg.cbcInternalAnalytics);
+  const [schoolLogo, rawSetSchoolLogo] = useState<string>(cfg.schoolLogo ?? "");
+  const [schoolAddress, rawSetSchoolAddress] = useState<string>(cfg.schoolAddress ?? "P.O. Box 40300-00100 Nairobi · Tel: +254 712 345 678");
+  const [schoolMotto, rawSetSchoolMotto] = useState<string>(cfg.schoolMotto ?? "Strive for Excellence");
+  const [nextTermDate, rawSetNextTermDate] = useState<string>(cfg.nextTermDate ?? "5th May 2026");
+  const [principalName, rawSetPrincipalName] = useState<string>(cfg.principalName ?? "School Principal");
   const [dirty, setDirty] = useState(false);
 
   // Any manual edit stops the server value from overwriting the editor.
@@ -58,13 +63,22 @@ function GradingPage() {
   const setBestN = touch(rawSetBestN);
   const setRollup = touch(rawSetRollup);
   const setInternal = touch(rawSetInternal);
-
+  const setSchoolLogo = touch(rawSetSchoolLogo);
+  const setSchoolAddress = touch(rawSetSchoolAddress);
+  const setSchoolMotto = touch(rawSetSchoolMotto);
+  const setNextTermDate = touch(rawSetNextTermDate);
+  const setPrincipalName = touch(rawSetPrincipalName);
 
   // Hydrate the editor once the school's stored configuration arrives.
   useEffect(() => {
     if (dirty) return;
     rawSetEight(cfg.eight); rawSetCbc4(cfg.cbc4); rawSetCbc8(cfg.cbc8); rawSetSplit(cfg.splitCBC);
     rawSetMeanRule(cfg.meanRule); rawSetBestN(cfg.bestN); rawSetRollup(cfg.cbcRollup); rawSetInternal(cfg.cbcInternalAnalytics);
+    rawSetSchoolLogo(cfg.schoolLogo ?? "");
+    rawSetSchoolAddress(cfg.schoolAddress ?? "P.O. Box 40300-00100 Nairobi · Tel: +254 712 345 678");
+    rawSetSchoolMotto(cfg.schoolMotto ?? "Strive for Excellence");
+    rawSetNextTermDate(cfg.nextTermDate ?? "5th May 2026");
+    rawSetPrincipalName(cfg.principalName ?? "School Principal");
   }, [cfg, dirty]);
 
   const eightErr = validateBands(eight);
@@ -75,7 +89,7 @@ function GradingPage() {
     onSuccess: () => {
       setDirty(false);
       refresh();
-      toast.success("Grading configuration saved. Teachers see the new rules instantly.");
+      toast.success("School branding and grading configuration saved successfully.");
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save configuration"),
   });
@@ -90,6 +104,11 @@ function GradingPage() {
       meanRule, bestN,
       cbcRollup: rollup,
       cbcInternalAnalytics: internal,
+      schoolLogo,
+      schoolAddress,
+      schoolMotto,
+      nextTermDate,
+      principalName,
     } as unknown as Record<string, unknown>);
   }
 
@@ -97,6 +116,11 @@ function GradingPage() {
     setDirty(false);
     rawSetEight(cfg.eight); rawSetCbc4(cfg.cbc4); rawSetCbc8(cfg.cbc8); rawSetSplit(cfg.splitCBC);
     rawSetMeanRule(cfg.meanRule); rawSetBestN(cfg.bestN); rawSetRollup(cfg.cbcRollup); rawSetInternal(cfg.cbcInternalAnalytics);
+    rawSetSchoolLogo(cfg.schoolLogo ?? "");
+    rawSetSchoolAddress(cfg.schoolAddress ?? "P.O. Box 40300-00100 Nairobi · Tel: +254 712 345 678");
+    rawSetSchoolMotto(cfg.schoolMotto ?? "Strive for Excellence");
+    rawSetNextTermDate(cfg.nextTermDate ?? "5th May 2026");
+    rawSetPrincipalName(cfg.principalName ?? "School Principal");
   }
 
   return (
@@ -116,6 +140,78 @@ function GradingPage() {
       />
 
       <div className="grid gap-6 xl:grid-cols-2">
+        {/* School Branding Card */}
+        <Card className="border-border/70 xl:col-span-2">
+          <CardContent className="p-5 space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <div>
+                <div className="text-base font-semibold text-[#17233D]">School Branding & Report Card Header</div>
+                <p className="text-xs text-muted-foreground">
+                  Customise your school logo, official address, motto, and principal signature details for teacher dashboards and printable student report cards.
+                </p>
+              </div>
+              <Badge variant="outline" className="border-[#E8672E] text-[#E8672E]">Dashboard & Report Customization</Badge>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div>
+                <Label className="text-xs font-semibold text-[#17233D]">School Logo / Crest Image Link</Label>
+                <Input
+                  value={schoolLogo}
+                  onChange={(e) => setSchoolLogo(e.target.value)}
+                  placeholder="https://... or leave blank for default crest"
+                  className="mt-1 text-sm"
+                />
+                <p className="mt-1 text-[11px] text-muted-foreground">Image link or logo image URL</p>
+              </div>
+
+              <div>
+                <Label className="text-xs font-semibold text-[#17233D]">Official School Address & Contacts</Label>
+                <Input
+                  value={schoolAddress}
+                  onChange={(e) => setSchoolAddress(e.target.value)}
+                  placeholder="P.O. Box 40300-00100 Nairobi · Tel: 0712 345 678"
+                  className="mt-1 text-sm"
+                />
+                <p className="mt-1 text-[11px] text-muted-foreground">Appears at top of report cards</p>
+              </div>
+
+              <div>
+                <Label className="text-xs font-semibold text-[#17233D]">School Motto / Tagline</Label>
+                <Input
+                  value={schoolMotto}
+                  onChange={(e) => setSchoolMotto(e.target.value)}
+                  placeholder="e.g. Strive for Excellence"
+                  className="mt-1 text-sm"
+                />
+                <p className="mt-1 text-[11px] text-muted-foreground">Appears below school name</p>
+              </div>
+
+              <div>
+                <Label className="text-xs font-semibold text-[#17233D]">Next Term Reopening Date</Label>
+                <Input
+                  value={nextTermDate}
+                  onChange={(e) => setNextTermDate(e.target.value)}
+                  placeholder="e.g. 5th May 2026"
+                  className="mt-1 text-sm"
+                />
+                <p className="mt-1 text-[11px] text-muted-foreground">Printed on student report cards</p>
+              </div>
+
+              <div>
+                <Label className="text-xs font-semibold text-[#17233D]">Principal Signature Title / Name</Label>
+                <Input
+                  value={principalName}
+                  onChange={(e) => setPrincipalName(e.target.value)}
+                  placeholder="e.g. Mrs. Jane Wanjiku, Principal"
+                  className="mt-1 text-sm"
+                />
+                <p className="mt-1 text-[11px] text-muted-foreground">Printed at bottom of report cards</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* 8-4-4 table */}
         <Card className="border-border/70"><CardContent className="p-5">
           <div className="flex items-center justify-between">

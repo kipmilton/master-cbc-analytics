@@ -17,6 +17,11 @@ export interface GradingConfig {
   cbcRollup: CBCRollup;
   cbcInternalAnalytics: boolean;
   bundles: SubjectBundle[];
+  schoolLogo?: string;
+  schoolAddress?: string;
+  schoolMotto?: string;
+  nextTermDate?: string;
+  principalName?: string;
 }
 
 export const DEFAULT_EIGHT: EightBand[] = [
@@ -62,6 +67,11 @@ export const DEFAULT_GRADING: GradingConfig = {
   cbcRollup: "common-band",
   cbcInternalAnalytics: false,
   bundles: [],
+  schoolLogo: "",
+  schoolAddress: "P.O. Box 40300-00100 Nairobi · Tel: +254 712 345 678",
+  schoolMotto: "Strive for Excellence",
+  nextTermDate: "5th May 2026",
+  principalName: "School Principal",
 };
 
 /** Fold whatever is stored in the DB over the defaults so the UI never sees holes. */

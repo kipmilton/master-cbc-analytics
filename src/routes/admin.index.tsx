@@ -5,6 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Building2, GraduationCap, FileSpreadsheet, Activity, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useSession } from "@/hooks/use-session";
+import { getGreeting } from "@/lib/utils";
 import { getPlatformStats, listAllSchools } from "@/lib/tenants.functions";
 
 export const Route = createFileRoute("/admin/")({
@@ -22,16 +24,17 @@ export const Route = createFileRoute("/admin/")({
 });
 
 function AdminOverview() {
+  const user = useSession();
   const stats = useQuery({ queryKey: ["platformStats"], queryFn: () => getPlatformStats(), staleTime: 15_000 });
   const schools = useQuery({ queryKey: ["allSchools"], queryFn: () => listAllSchools(), staleTime: 15_000 });
 
   const s = stats.data;
-  const recent = (schools.data ?? []).slice(0, 8);
+  const recent = (Array.isArray(schools.data) ? schools.data : []).slice(0, 8);
 
   return (
     <AppShell allow={["super_admin"]}>
       <PageHeader
-        title="System Overview"
+        title={getGreeting(user?.name)}
         subtitle="Global view across every school on Master CBC."
         action={<Button asChild size="sm"><Link to="/admin/schools">Manage schools</Link></Button>}
       />

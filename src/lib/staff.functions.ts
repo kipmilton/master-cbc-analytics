@@ -16,7 +16,7 @@ export interface StaffRow {
 
 export const createSchoolStaff = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((raw) =>
+  .validator((raw) =>
     z
       .object({
         role: z.enum(["deputy_academic", "deputy_admin", "dean_academics", "teacher"]),
@@ -45,7 +45,7 @@ export const listSchoolStaff = createServerFn({ method: "GET" })
 
 export const updateTeacherAssignments = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((raw) =>
+  .validator((raw) =>
     z
       .object({
         teacherId: z.string().uuid(),
@@ -62,7 +62,7 @@ export const updateTeacherAssignments = createServerFn({ method: "POST" })
 
 export const removeSchoolStaff = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((raw) => z.object({ userId: z.string().uuid() }).parse(raw))
+  .validator((raw) => z.object({ userId: z.string().uuid() }).parse(raw))
   .handler(async ({ data, context }) => {
     const { assertSchoolAdmin } = await import("./tenant-guard.server");
     const { detachStaff } = await import("./staff.server");

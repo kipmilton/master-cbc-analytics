@@ -31,8 +31,10 @@ function SchoolsPage() {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Rejection failed"),
   });
 
-  const pending = (apps.data ?? []).filter((a) => a.status === "pending");
-  const reviewed = (apps.data ?? []).filter((a) => a.status !== "pending");
+  const allApps = Array.isArray(apps.data) ? apps.data : [];
+  const allSchools = Array.isArray(schools.data) ? schools.data : [];
+  const pending = allApps.filter((a) => a.status === "pending");
+  const reviewed = allApps.filter((a) => a.status !== "pending");
 
   return (
     <AppShell allow={["super_admin"]}>
@@ -103,7 +105,7 @@ function SchoolsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {(schools.data ?? []).map((s) => (
+                {allSchools.map((s) => (
                   <tr key={s.id}>
                     <td className="px-4 py-3 font-medium">{s.name}</td>
                     <td className="px-4 py-3 text-muted-foreground">{s.county}</td>
@@ -114,7 +116,7 @@ function SchoolsPage() {
                     </td>
                   </tr>
                 ))}
-                {(schools.data ?? []).length === 0 && (
+                {allSchools.length === 0 && (
                   <tr><td colSpan={5} className="px-4 py-6 text-center text-sm text-muted-foreground">No schools yet.</td></tr>
                 )}
               </tbody>

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useSession } from "@/hooks/use-session";
 import { useSchoolData } from "@/hooks/use-school-data";
 import { EXAM_TERMS, examMean } from "@/lib/analytics";
+import { getGreeting } from "@/lib/utils";
 import { GraduationCap, Users, ClipboardCheck, ArrowRight } from "lucide-react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
@@ -44,7 +45,7 @@ function TeacherHome() {
   return (
     <AppShell allow={["teacher"]}>
       <PageHeader
-        title={`Welcome, ${user?.name?.split(" ")[0] ?? "Teacher"}`}
+        title={getGreeting(user?.name)}
         subtitle="Your classes, your learners, your live data."
       />
       <div className="grid gap-4 sm:grid-cols-3">

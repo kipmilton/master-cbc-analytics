@@ -2,7 +2,7 @@ import { createStart, createMiddleware } from "@tanstack/react-start";
 
 import { renderErrorPage } from "./lib/error-page";
 
-const errorMiddleware = createMiddleware().server(async ({ next }) => {
+const errorMiddleware = createMiddleware().server(async ({ next, request }) => {
   try {
     return await next();
   } catch (error) {
@@ -11,6 +11,15 @@ const errorMiddleware = createMiddleware().server(async ({ next }) => {
     }
     // Let Response throws (401/403) bubble through unchanged
     if (error instanceof Response) throw error;
+
+    // For API / server function calls (e.g. JSON requests, _serverFn, non-HTML),
+    // rethrow the error so TanStack Start serializes and transmits the actual error message to the client
+    const acceptHeader = request?.headers?.get("accept") ?? "";
+    const isHtmlRequest = acceptHeader.includes("text/html");
+    if (!isHtmlRequest) {
+      throw error;
+    }
+
     console.error(error);
     return new Response(renderErrorPage(), {
       status: 500,

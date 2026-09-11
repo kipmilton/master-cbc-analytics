@@ -81,16 +81,14 @@ export function PublicFooter() {
           <div>
             <h4 className="text-sm font-semibold">Legal</h4>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li><a className="hover:text-foreground" href="#">Privacy Policy</a></li>
-              <li><a className="hover:text-foreground" href="#">Terms of Service</a></li>
-              <li><a className="hover:text-foreground" href="#">Data Protection (Kenya DPA)</a></li>
+              <li><Link to="/privacy" className="hover:text-foreground">Privacy Policy</Link></li>
+              <li><Link to="/terms" className="hover:text-foreground">Terms of Service</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="text-sm font-semibold">Support</h4>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               <li><a className="hover:text-foreground" href="mailto:support@mastercbc.co.ke">support@mastercbc.co.ke</a></li>
-              <li>+254 (0) 700 000 000</li>
             </ul>
           </div>
         </div>

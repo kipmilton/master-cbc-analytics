@@ -9,8 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PendingApprovalRouteImport } from './routes/pending-approval'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -21,6 +24,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as TeacherIndexRouteImport } from './routes/teacher.index'
 import { Route as SchoolIndexRouteImport } from './routes/school.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as TeacherReportCardsRouteImport } from './routes/teacher.report-cards'
 import { Route as TeacherMyClassRouteImport } from './routes/teacher.my-class'
 import { Route as TeacherExamsRouteImport } from './routes/teacher.exams'
 import { Route as TeacherDirectoryRouteImport } from './routes/teacher.directory'
@@ -33,15 +37,31 @@ import { Route as SchoolGradingRouteImport } from './routes/school.grading'
 import { Route as SchoolExamsRouteImport } from './routes/school.exams'
 import { Route as SchoolAnalyticsRouteImport } from './routes/school.analytics'
 import { Route as AdminSchoolsRouteImport } from './routes/admin.schools'
+import { Route as AdminBlogsRouteImport } from './routes/admin.blogs'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PendingApprovalRoute = PendingApprovalRouteImport.update({
@@ -92,6 +112,11 @@ const SchoolIndexRoute = SchoolIndexRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherReportCardsRoute = TeacherReportCardsRouteImport.update({
+  id: '/teacher/report-cards',
+  path: '/teacher/report-cards',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TeacherMyClassRoute = TeacherMyClassRouteImport.update({
@@ -154,6 +179,11 @@ const AdminSchoolsRoute = AdminSchoolsRouteImport.update({
   path: '/admin/schools',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminBlogsRoute = AdminBlogsRouteImport.update({
+  id: '/admin/blogs',
+  path: '/admin/blogs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -163,8 +193,12 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/pending-approval': typeof PendingApprovalRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
+  '/terms': typeof TermsRoute
+  '/admin/blogs': typeof AdminBlogsRoute
   '/admin/schools': typeof AdminSchoolsRoute
   '/school/analytics': typeof SchoolAnalyticsRoute
   '/school/exams': typeof SchoolExamsRoute
@@ -177,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/teacher/directory': typeof TeacherDirectoryRoute
   '/teacher/exams': typeof TeacherExamsRoute
   '/teacher/my-class': typeof TeacherMyClassRoute
+  '/teacher/report-cards': typeof TeacherReportCardsRoute
   '/admin/': typeof AdminIndexRoute
   '/school/': typeof SchoolIndexRoute
   '/teacher/': typeof TeacherIndexRoute
@@ -189,8 +224,12 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/pending-approval': typeof PendingApprovalRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
+  '/terms': typeof TermsRoute
+  '/admin/blogs': typeof AdminBlogsRoute
   '/admin/schools': typeof AdminSchoolsRoute
   '/school/analytics': typeof SchoolAnalyticsRoute
   '/school/exams': typeof SchoolExamsRoute
@@ -203,6 +242,7 @@ export interface FileRoutesByTo {
   '/teacher/directory': typeof TeacherDirectoryRoute
   '/teacher/exams': typeof TeacherExamsRoute
   '/teacher/my-class': typeof TeacherMyClassRoute
+  '/teacher/report-cards': typeof TeacherReportCardsRoute
   '/admin': typeof AdminIndexRoute
   '/school': typeof SchoolIndexRoute
   '/teacher': typeof TeacherIndexRoute
@@ -216,8 +256,12 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
   '/pending-approval': typeof PendingApprovalRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
+  '/terms': typeof TermsRoute
+  '/admin/blogs': typeof AdminBlogsRoute
   '/admin/schools': typeof AdminSchoolsRoute
   '/school/analytics': typeof SchoolAnalyticsRoute
   '/school/exams': typeof SchoolExamsRoute
@@ -230,6 +274,7 @@ export interface FileRoutesById {
   '/teacher/directory': typeof TeacherDirectoryRoute
   '/teacher/exams': typeof TeacherExamsRoute
   '/teacher/my-class': typeof TeacherMyClassRoute
+  '/teacher/report-cards': typeof TeacherReportCardsRoute
   '/admin/': typeof AdminIndexRoute
   '/school/': typeof SchoolIndexRoute
   '/teacher/': typeof TeacherIndexRoute
@@ -244,8 +289,12 @@ export interface FileRouteTypes {
     | '/contact'
     | '/login'
     | '/pending-approval'
+    | '/privacy'
     | '/reset-password'
+    | '/settings'
     | '/signup'
+    | '/terms'
+    | '/admin/blogs'
     | '/admin/schools'
     | '/school/analytics'
     | '/school/exams'
@@ -258,6 +307,7 @@ export interface FileRouteTypes {
     | '/teacher/directory'
     | '/teacher/exams'
     | '/teacher/my-class'
+    | '/teacher/report-cards'
     | '/admin/'
     | '/school/'
     | '/teacher/'
@@ -270,8 +320,12 @@ export interface FileRouteTypes {
     | '/contact'
     | '/login'
     | '/pending-approval'
+    | '/privacy'
     | '/reset-password'
+    | '/settings'
     | '/signup'
+    | '/terms'
+    | '/admin/blogs'
     | '/admin/schools'
     | '/school/analytics'
     | '/school/exams'
@@ -284,6 +338,7 @@ export interface FileRouteTypes {
     | '/teacher/directory'
     | '/teacher/exams'
     | '/teacher/my-class'
+    | '/teacher/report-cards'
     | '/admin'
     | '/school'
     | '/teacher'
@@ -296,8 +351,12 @@ export interface FileRouteTypes {
     | '/contact'
     | '/login'
     | '/pending-approval'
+    | '/privacy'
     | '/reset-password'
+    | '/settings'
     | '/signup'
+    | '/terms'
+    | '/admin/blogs'
     | '/admin/schools'
     | '/school/analytics'
     | '/school/exams'
@@ -310,6 +369,7 @@ export interface FileRouteTypes {
     | '/teacher/directory'
     | '/teacher/exams'
     | '/teacher/my-class'
+    | '/teacher/report-cards'
     | '/admin/'
     | '/school/'
     | '/teacher/'
@@ -323,8 +383,12 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   LoginRoute: typeof LoginRoute
   PendingApprovalRoute: typeof PendingApprovalRoute
+  PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
+  TermsRoute: typeof TermsRoute
+  AdminBlogsRoute: typeof AdminBlogsRoute
   AdminSchoolsRoute: typeof AdminSchoolsRoute
   SchoolAnalyticsRoute: typeof SchoolAnalyticsRoute
   SchoolExamsRoute: typeof SchoolExamsRoute
@@ -337,6 +401,7 @@ export interface RootRouteChildren {
   TeacherDirectoryRoute: typeof TeacherDirectoryRoute
   TeacherExamsRoute: typeof TeacherExamsRoute
   TeacherMyClassRoute: typeof TeacherMyClassRoute
+  TeacherReportCardsRoute: typeof TeacherReportCardsRoute
   AdminIndexRoute: typeof AdminIndexRoute
   SchoolIndexRoute: typeof SchoolIndexRoute
   TeacherIndexRoute: typeof TeacherIndexRoute
@@ -344,6 +409,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -351,11 +423,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pending-approval': {
@@ -426,6 +512,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher/report-cards': {
+      id: '/teacher/report-cards'
+      path: '/teacher/report-cards'
+      fullPath: '/teacher/report-cards'
+      preLoaderRoute: typeof TeacherReportCardsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/teacher/my-class': {
@@ -512,6 +605,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSchoolsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/blogs': {
+      id: '/admin/blogs'
+      path: '/admin/blogs'
+      fullPath: '/admin/blogs'
+      preLoaderRoute: typeof AdminBlogsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -523,8 +623,12 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   LoginRoute: LoginRoute,
   PendingApprovalRoute: PendingApprovalRoute,
+  PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
+  TermsRoute: TermsRoute,
+  AdminBlogsRoute: AdminBlogsRoute,
   AdminSchoolsRoute: AdminSchoolsRoute,
   SchoolAnalyticsRoute: SchoolAnalyticsRoute,
   SchoolExamsRoute: SchoolExamsRoute,
@@ -537,6 +641,7 @@ const rootRouteChildren: RootRouteChildren = {
   TeacherDirectoryRoute: TeacherDirectoryRoute,
   TeacherExamsRoute: TeacherExamsRoute,
   TeacherMyClassRoute: TeacherMyClassRoute,
+  TeacherReportCardsRoute: TeacherReportCardsRoute,
   AdminIndexRoute: AdminIndexRoute,
   SchoolIndexRoute: SchoolIndexRoute,
   TeacherIndexRoute: TeacherIndexRoute,

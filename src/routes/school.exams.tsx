@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/DashboardBits";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,7 +14,7 @@ import { EXAM_TERMS, RUBRICS, examMean, scoreToGrade } from "@/lib/analytics";
 import { useMutation } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Lock, LockOpen, Pencil, Trash2, Save, Loader2 } from "lucide-react";
+import { Plus, Lock, LockOpen, Pencil, Trash2, Save, Loader2, Printer } from "lucide-react";
 
 export const Route = createFileRoute("/school/exams")({
   head: () => ({
@@ -132,6 +132,13 @@ function AdminExamsPage() {
       <PageHeader
         title="Exams & Results"
         subtitle="Every figure on the Overview and Analytics dashboards is computed from these records."
+        action={
+          <Link to="/teacher/report-cards">
+            <Button size="sm" className="bg-[#E8672E] hover:bg-[#C6511F] text-white">
+              <Printer className="mr-1.5 h-4 w-4" /> Print Student Report Cards
+            </Button>
+          </Link>
+        }
       />
 
       <div className="grid gap-6 xl:grid-cols-5">

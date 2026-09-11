@@ -24,6 +24,8 @@ export const requireAuth = createMiddleware({ type: "function" })
       context: {
         userId: data.user.id,
         email: data.user.email,
+        userMetaName: (data.user.user_metadata?.name as string) ?? "",
+        userMetaTitle: (data.user.user_metadata?.title as string) ?? "",
       },
     });
   });

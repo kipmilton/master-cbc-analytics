@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import faviconUrl from "../assets/favicon.png";
 
 function NotFoundComponent() {
   return (
@@ -83,6 +84,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:site", content: "@MasterCBC" },
     ],
     links: [
+      {
+        rel: "icon",
+        type: "image/png",
+        href: faviconUrl,
+      },
+      {
+        rel: "shortcut icon",
+        href: faviconUrl,
+      },
+      {
+        rel: "apple-touch-icon",
+        href: faviconUrl,
+      },
       {
         rel: "stylesheet",
         href: appCss,

@@ -2,14 +2,14 @@ import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { signOut } from "@/lib/auth-store";
-import { roleLabel, isSchoolAdminRole } from "@/lib/roles";
+import { signOut, roleLabel, isSchoolAdminRole } from "@/lib/auth-store";
+import { getGreeting } from "@/lib/utils";
 import { useSession } from "@/hooks/use-session";
 import { useSchoolData } from "@/hooks/use-school-data";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   LogOut, LayoutDashboard, Building2, Users, BookOpen, GraduationCap, BarChart3,
-  FileSpreadsheet, ShieldCheck, SlidersHorizontal, UsersRound, ClipboardCheck, UserSquare2,
+  FileSpreadsheet, ShieldCheck, SlidersHorizontal, UsersRound, ClipboardCheck, UserSquare2, Printer, Settings,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
@@ -28,7 +28,7 @@ export function AppShell({ children, allow }: { children: ReactNode; allow: Allo
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { rosters } = useSchoolData();
+  const { rosters, grading } = useSchoolData();
 
   useEffect(() => {
     if (user === undefined) return;
@@ -66,6 +66,8 @@ export function AppShell({ children, allow }: { children: ReactNode; allow: Allo
     ? [
         { to: "/admin", label: "Overview", icon: LayoutDashboard },
         { to: "/admin/schools", label: "Schools", icon: Building2 },
+        { to: "/admin/blogs", label: "Manage Blog", icon: FileSpreadsheet },
+        { to: "/settings", label: "Settings", icon: Settings },
       ]
     : schoolAdmin
     ? [
@@ -74,16 +76,20 @@ export function AppShell({ children, allow }: { children: ReactNode; allow: Allo
         { to: "/school/rosters", label: "Roster Approvals", icon: ClipboardCheck, badge: pendingRosters || undefined },
         { to: "/school/subjects", label: "Subjects", icon: BookOpen },
         { to: "/school/exams", label: "Exams & Results", icon: FileSpreadsheet },
-        { to: "/school/grading", label: "Grading", icon: SlidersHorizontal },
+        { to: "/teacher/report-cards", label: "Print Report Cards", icon: Printer },
+        { to: "/school/grading", label: "Branding & Grading", icon: SlidersHorizontal },
         { to: "/school/teachers", label: "Staff", icon: Users },
         { to: "/school/analytics", label: "Analytics", icon: BarChart3 },
+        { to: "/settings", label: "Settings", icon: Settings },
       ]
     : (() => {
         const base: NavItem[] = [
           { to: "/teacher", label: "Overview", icon: LayoutDashboard },
           { to: "/teacher/classes", label: "My Classes", icon: GraduationCap },
           { to: "/teacher/exams", label: "Enter Exam", icon: FileSpreadsheet },
+          { to: "/teacher/report-cards", label: "Print Report Cards", icon: Printer },
           { to: "/teacher/directory", label: "Directory", icon: Users },
+          { to: "/settings", label: "Settings", icon: Settings },
         ];
         if (isClassTeacher) base.splice(2, 0, { to: "/teacher/my-class", label: "My Class", icon: UserSquare2 });
         return base;
@@ -99,13 +105,20 @@ export function AppShell({ children, allow }: { children: ReactNode; allow: Allo
   return (
     <div className="flex min-h-screen bg-secondary/30">
       <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-sidebar md:flex">
-        <div className="flex h-16 items-center border-b border-border px-5">
-          <Logo className="h-7 w-auto" />
+        <div className="flex h-16 items-center gap-3 border-b border-border px-5">
+          {grading?.schoolLogo ? (
+            <img src={grading.schoolLogo} alt="School Logo" className="h-9 w-auto max-w-[140px] object-contain" />
+          ) : (
+            <Logo className="h-7 w-auto" />
+          )}
         </div>
         {user.schoolName && (
           <div className="border-b border-border px-5 py-3">
             <div className="text-xs uppercase tracking-wide text-muted-foreground">School</div>
             <div className="truncate text-sm font-semibold">{user.schoolName}</div>
+            {grading?.schoolMotto ? (
+              <div className="truncate text-[11px] text-muted-foreground italic mt-0.5">&ldquo;{grading.schoolMotto}&rdquo;</div>
+            ) : null}
           </div>
         )}
         <nav className="flex-1 space-y-1 p-3">
@@ -133,7 +146,7 @@ export function AppShell({ children, allow }: { children: ReactNode; allow: Allo
         <div className="border-t border-border p-3">
           <div className="flex items-center gap-2 rounded-md bg-accent/40 px-3 py-2 text-xs text-accent-foreground">
             <ShieldCheck className="h-4 w-4 text-brand-blue" />
-            <span>Tenant isolated</span>
+            <span>School Data Protected</span>
           </div>
         </div>
       </aside>
@@ -141,7 +154,7 @@ export function AppShell({ children, allow }: { children: ReactNode; allow: Allo
         <header className="flex h-16 items-center justify-between border-b border-border bg-background px-4 sm:px-6">
           <div className="md:hidden"><Logo className="h-6 w-auto" /></div>
           <div className="hidden flex-col md:flex">
-            <span className="text-sm font-semibold">{user.name}</span>
+            <span className="text-sm font-semibold">{getGreeting(user.name)}</span>
             <span className="text-xs text-muted-foreground">{user.title ?? roleLabel(user.role)}</span>
           </div>
           <div className="flex items-center gap-3">

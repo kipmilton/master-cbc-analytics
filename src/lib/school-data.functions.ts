@@ -104,7 +104,7 @@ export const getSchoolSnapshot = createServerFn({ method: "GET" })
 
 export const saveStream = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((raw) =>
+  .validator((raw) =>
     z
       .object({
         id: z.string().uuid().optional(),
@@ -123,7 +123,7 @@ export const saveStream = createServerFn({ method: "POST" })
 
 export const deleteStream = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((raw) => z.object({ id: z.string().uuid() }).parse(raw))
+  .validator((raw) => z.object({ id: z.string().uuid() }).parse(raw))
   .handler(async ({ data, context }) => {
     const { assertSchoolAdmin, assertOwnedRows } = await import("./tenant-guard.server");
     const caller = await assertSchoolAdmin(context.userId);
@@ -136,7 +136,7 @@ export const deleteStream = createServerFn({ method: "POST" })
 
 export const saveSubject = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((raw) =>
+  .validator((raw) =>
     z
       .object({
         id: z.string().uuid().optional(),
@@ -158,7 +158,7 @@ export const saveSubject = createServerFn({ method: "POST" })
 
 export const setSubjectApproved = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((raw) => z.object({ id: z.string().uuid(), approved: z.boolean() }).parse(raw))
+  .validator((raw) => z.object({ id: z.string().uuid(), approved: z.boolean() }).parse(raw))
   .handler(async ({ data, context }) => {
     const { assertSchoolAdmin, assertOwnedRows } = await import("./tenant-guard.server");
     const caller = await assertSchoolAdmin(context.userId);
@@ -173,7 +173,7 @@ export const setSubjectApproved = createServerFn({ method: "POST" })
 
 export const deleteSubject = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((raw) => z.object({ id: z.string().uuid() }).parse(raw))
+  .validator((raw) => z.object({ id: z.string().uuid() }).parse(raw))
   .handler(async ({ data, context }) => {
     const { assertSchoolAdmin, assertOwnedRows } = await import("./tenant-guard.server");
     const caller = await assertSchoolAdmin(context.userId);
@@ -186,7 +186,7 @@ export const deleteSubject = createServerFn({ method: "POST" })
 
 export const saveStudents = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((raw) =>
+  .validator((raw) =>
     z
       .object({
         students: z
@@ -216,7 +216,7 @@ export const saveStudents = createServerFn({ method: "POST" })
 
 export const setStudentStatus = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((raw) =>
+  .validator((raw) =>
     z
       .object({
         id: z.string().uuid(),
@@ -243,7 +243,7 @@ export const setStudentStatus = createServerFn({ method: "POST" })
 
 export const assignStudentsToStream = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((raw) =>
+  .validator((raw) =>
     z
       .object({
         studentIds: z.array(z.string().uuid()).min(1),
@@ -266,7 +266,7 @@ export const assignStudentsToStream = createServerFn({ method: "POST" })
 
 export const deleteStudent = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((raw) => z.object({ id: z.string().uuid() }).parse(raw))
+  .validator((raw) => z.object({ id: z.string().uuid() }).parse(raw))
   .handler(async ({ data, context }) => {
     const { assertSchoolAdmin, assertOwnedRows } = await import("./tenant-guard.server");
     const caller = await assertSchoolAdmin(context.userId);
@@ -279,7 +279,7 @@ export const deleteStudent = createServerFn({ method: "POST" })
 
 export const submitRoster = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((raw) =>
+  .validator((raw) =>
     z
       .object({
         id: z.string().uuid().optional(),
@@ -307,7 +307,7 @@ export const submitRoster = createServerFn({ method: "POST" })
 
 export const reviewRoster = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((raw) =>
+  .validator((raw) =>
     z
       .object({
         id: z.string().uuid(),
@@ -326,7 +326,7 @@ export const reviewRoster = createServerFn({ method: "POST" })
 
 export const saveExam = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((raw) =>
+  .validator((raw) =>
     z
       .object({
         id: z.string().uuid().optional(),
@@ -356,7 +356,7 @@ export const saveExam = createServerFn({ method: "POST" })
 
 export const setExamLocked = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((raw) => z.object({ id: z.string().uuid(), locked: z.boolean() }).parse(raw))
+  .validator((raw) => z.object({ id: z.string().uuid(), locked: z.boolean() }).parse(raw))
   .handler(async ({ data, context }) => {
     const { assertSchoolAdmin, assertOwnedRows } = await import("./tenant-guard.server");
     const caller = await assertSchoolAdmin(context.userId);
@@ -371,7 +371,7 @@ export const setExamLocked = createServerFn({ method: "POST" })
 
 export const deleteExam = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((raw) => z.object({ id: z.string().uuid() }).parse(raw))
+  .validator((raw) => z.object({ id: z.string().uuid() }).parse(raw))
   .handler(async ({ data, context }) => {
     const { assertSchoolAdmin, assertOwnedRows } = await import("./tenant-guard.server");
     const caller = await assertSchoolAdmin(context.userId);
@@ -384,7 +384,7 @@ export const deleteExam = createServerFn({ method: "POST" })
 
 export const saveGradingConfig = createServerFn({ method: "POST" })
   .middleware([requireAuth])
-  .inputValidator((raw) => z.object({ config: z.record(z.string(), z.unknown()) }).parse(raw))
+  .validator((raw) => z.object({ config: z.record(z.string(), z.unknown()) }).parse(raw))
   .handler(async ({ data, context }) => {
     const { assertSchoolAdmin } = await import("./tenant-guard.server");
     const caller = await assertSchoolAdmin(context.userId);

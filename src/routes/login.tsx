@@ -30,8 +30,6 @@ function LoginPage() {
     setErrorMessage("");
 
     const result = await signIn(email, password);
-    console.log("login submit", { email, password, result });
-
     setBusy(false);
 
     if (!result.user) {
