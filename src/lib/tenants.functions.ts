@@ -82,11 +82,16 @@ export const submitSchoolApplication = createServerFn({ method: "POST" })
 
         userId = signInData.user.id;
       } else if (authErr) {
-        throw new Error(authErr.message);
+        throw new Error(friendlySignupError(authErr.message));
       } else {
         userId = authData.user?.id ?? null;
       }
     }
+
+    if (!userId) {
+      throw new Error(friendlySignupError(""));
+    }
+
 
     if (userId) {
       const db = hasServiceRole ? admin : supabase;
