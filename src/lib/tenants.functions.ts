@@ -13,6 +13,17 @@ const applicationSchema = z.object({
   principalTitle: z.string().default("Principal"),
 });
 
+/** Turn opaque auth/database failures into something an applicant can act on. */
+function friendlySignupError(message: string): string {
+  const m = (message || "").trim();
+  if (!m || m === "{}" || /database error|unexpected_failure/i.test(m)) {
+    return "We could not create your account because the school database rejected the new user. Please contact Master CBC support so we can finish setting up your account.";
+  }
+  if (/password/i.test(m)) return "Please choose a stronger password (at least 8 characters).";
+  if (/rate limit|too many/i.test(m)) return "Too many attempts. Please wait a minute and try again.";
+  return m;
+}
+
 export const submitSchoolApplication = createServerFn({ method: "POST" })
   .validator((raw) => applicationSchema.parse(raw))
   .handler(async ({ data }) => {
@@ -82,11 +93,16 @@ export const submitSchoolApplication = createServerFn({ method: "POST" })
 
         userId = signInData.user.id;
       } else if (authErr) {
-        throw new Error(authErr.message);
+        throw new Error(friendlySignupError(authErr.message));
       } else {
         userId = authData.user?.id ?? null;
       }
     }
+
+    if (!userId) {
+      throw new Error(friendlySignupError(""));
+    }
+
 
     if (userId) {
       const db = hasServiceRole ? admin : supabase;
